@@ -1,0 +1,43 @@
+AARAV SHARMA
+Senior Python Developer
+Email: aarav.sharma@email.com | Phone: +91 98765 43210
+LinkedIn: linkedin.com/in/aaravsharma | GitHub: github.com/aaravsharma
+
+PROFESSIONAL SUMMARY
+Experienced Python developer with 5 years of expertise in backend development, machine learning, and NLP. Passionate about building intelligent systems and scalable microservices. Strong communication and leadership skills.
+
+TECHNICAL SKILLS
+- Languages: Python, JavaScript, SQL, Bash
+- Frameworks: Flask, FastAPI, Django, React
+- ML/AI: scikit-learn, TensorFlow, PyTorch, SpaCy, NLP, Deep Learning
+- Databases: PostgreSQL, MongoDB, Redis
+- DevOps: Docker, Kubernetes, AWS, CI/CD, Jenkins, Linux, Git
+- Tools: Jupyter, Pandas, NumPy, Matplotlib, Airflow
+
+EXPERIENCE
+
+Senior Software Engineer | DataMind Technologies, Bengaluru
+Jan 2022 – Present
+- Developed NLP pipelines for resume parsing and entity extraction using SpaCy
+- Built RESTful APIs using Flask serving 10K+ requests daily
+- Deployed ML models on AWS using Docker and Kubernetes
+- Led a team of 4 engineers, conducting code reviews and mentoring junior developers
+
+Software Engineer | CloudSoft Solutions, Hyderabad
+Jun 2019 – Dec 2021
+- Designed microservices architecture for an e-commerce analytics platform
+- Implemented recommendation engine using scikit-learn and collaborative filtering
+- Built data pipelines with Airflow and PostgreSQL
+- Collaborated with cross-functional teams in an Agile environment
+
+EDUCATION
+B.Tech in Computer Science — IIT Delhi, 2019 (CGPA: 8.7)
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect – Associate
+- Deep Learning Specialization – Coursera (Andrew Ng)
+
+SOFT SKILLS
+- Leadership, Teamwork, Communication
+- Problem Solving, Time Management, Adaptability
+- Mentoring, Analytical Thinking

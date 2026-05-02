@@ -1,0 +1,10 @@
+Evan Wright
+Frontend Developer
+
+Experience:
+4 years. React, JavaScript, CSS, HTML. UI/UX focus.
+
+Skills:
+React, JavaScript, HTML, CSS
+
+Soft Skills: Communication, Problem Solving, Teamwork

@@ -1,0 +1,10 @@
+Julia Child
+Junior Python Developer
+
+Experience:
+1 year. Python, Flask, basic REST APIs. Eager to learn.
+
+Skills:
+Python, Flask, REST APIs
+
+Soft Skills: Communication, Problem Solving, Teamwork

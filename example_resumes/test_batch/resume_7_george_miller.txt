@@ -1,0 +1,10 @@
+George Miller
+AI Researcher
+
+Experience:
+8 years. Deep learning, Transformers, NLP, PyTorch, TensorFlow.
+
+Skills:
+Python, NLP, PyTorch, TensorFlow, Deep Learning
+
+Soft Skills: Communication, Problem Solving, Teamwork

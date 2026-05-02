@@ -1,0 +1,10 @@
+Ian Malcolm
+Cloud Architect
+
+Experience:
+12 years. AWS certified. Terraform, Python scripting, Docker.
+
+Skills:
+AWS, Terraform, Python, Docker
+
+Soft Skills: Communication, Problem Solving, Teamwork

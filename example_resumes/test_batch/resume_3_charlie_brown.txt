@@ -1,0 +1,10 @@
+Charlie Brown
+DevOps Engineer
+
+Experience:
+10 years. Expert in Docker, Kubernetes, AWS, CI/CD pipelines.
+
+Skills:
+Docker, Kubernetes, AWS, CI/CD, Linux
+
+Soft Skills: Communication, Problem Solving, Teamwork

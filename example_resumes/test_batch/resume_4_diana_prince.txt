@@ -1,0 +1,10 @@
+Diana Prince
+Senior Backend Engineer
+
+Experience:
+7 years. Python, Java, REST APIs, Microservices, AWS. Strong problem solving.
+
+Skills:
+Python, Java, REST APIs, AWS, Microservices
+
+Soft Skills: Communication, Problem Solving, Teamwork

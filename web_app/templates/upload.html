@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Upload — AI Resume Screener{% endblock %}
+
+{% block content %}
+<section class="upload-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="upload-header text-center">
+                    <div class="upload-icon-wrapper">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                    </div>
+                    <h1>Upload Documents</h1>
+                    <p>Provide a job description and candidate resumes to begin analysis</p>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <!-- Job Description Card -->
+                    <div class="upload-card">
+                        <div class="upload-card-header">
+                            <i class="bi bi-briefcase"></i>
+                            <h3>Job Description</h3>
+                        </div>
+                        <div class="upload-card-body">
+                            <div class="mb-3">
+                                <label for="job_description" class="form-label">
+                                    Type or paste the job description
+                                </label>
+                                <textarea class="form-control custom-textarea"
+                                          id="job_description"
+                                          name="job_description"
+                                          rows="6"
+                                          placeholder="e.g. We are looking for a Senior Python Developer with experience in machine learning, NLP, REST APIs, Docker..."></textarea>
+                            </div>
+                            <div class="or-divider"><span>OR</span></div>
+                            <div class="file-upload-zone" id="jdDropZone">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <p>Upload JD file (PDF, DOCX, TXT)</p>
+                                <input type="file" class="form-control" name="jd_file" id="jdFile"
+                                       accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumes Card -->
+                    <div class="upload-card">
+                        <div class="upload-card-header">
+                            <i class="bi bi-people"></i>
+                            <h3>Candidate Resumes</h3>
+                        </div>
+                        <div class="upload-card-body">
+                            <div class="file-upload-zone" id="resumeDropZone">
+                                <i class="bi bi-files"></i>
+                                <p>Upload multiple resume files (PDF, DOCX, TXT)</p>
+                                <input type="file" class="form-control" name="resumes" id="resumeFiles"
+                                       accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" multiple required>
+                            </div>
+                            <div id="fileList" class="file-list mt-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI Scoring Configuration Card -->
+                    <div class="upload-card">
+                        <div class="upload-card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-sliders"></i>
+                                <h3 class="d-inline-block mb-0 ms-2">AI Scoring Configuration</h3>
+                            </div>
+                            <span class="badge bg-secondary" id="totalWeightBadge">Total: 100%</span>
+                        </div>
+                        <div class="upload-card-body">
+                            <p class="text-muted small mb-3">Dynamically adjust how the AI prioritizes candidate metrics. Sliders map relative to each other.</p>
+                            
+                            <!-- Presets -->
+                            <div class="mb-4">
+                                <label class="form-label d-block text-muted small fw-bold">Quick Presets</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary preset-btn me-2" data-preset="default">Default</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary preset-btn me-2" data-preset="balanced">Balanced</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary preset-btn me-2" data-preset="strict">Strict Hiring (Tech)</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-preset="soft">Soft Skill Focus</button>
+                            </div>
+
+                            <!-- Sliders -->
+                            <div class="weight-slider-group mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label for="weight_tech" class="form-label mb-1">Technical Skills</label>
+                                    <span class="weight-value fw-bold text-primary" id="val_tech">60%</span>
+                                </div>
+                                <input type="range" class="form-range weight-slider" id="weight_tech" name="weight_tech" min="0" max="100" value="60">
+                            </div>
+
+                            <div class="weight-slider-group mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label for="weight_yoe" class="form-label mb-1">Years of Experience</label>
+                                    <span class="weight-value fw-bold text-primary" id="val_yoe">15%</span>
+                                </div>
+                                <input type="range" class="form-range weight-slider" id="weight_yoe" name="weight_yoe" min="0" max="100" value="15">
+                            </div>
+
+                            <div class="weight-slider-group mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label for="weight_context" class="form-label mb-1">Context Match (TF-IDF)</label>
+                                    <span class="weight-value fw-bold text-primary" id="val_context">15%</span>
+                                </div>
+                                <input type="range" class="form-range weight-slider" id="weight_context" name="weight_context" min="0" max="100" value="15">
+                            </div>
+
+                            <div class="weight-slider-group mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label for="weight_soft" class="form-label mb-1">Soft Skills</label>
+                                    <span class="weight-value fw-bold text-primary" id="val_soft">10%</span>
+                                </div>
+                                <input type="range" class="form-range weight-slider" id="weight_soft" name="weight_soft" min="0" max="100" value="10">
+                            </div>
+
+                            <hr class="text-muted">
+
+                            <div class="weight-slider-group mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <label for="weight_bonus" class="form-label mb-1 fw-bold text-success">Extra Skills Bonus Cap</label>
+                                    <span class="weight-value fw-bold text-success" id="val_bonus">+5%</span>
+                                </div>
+                                <p class="text-muted small mb-1" style="font-size: 0.8rem;">Maximum mathematical bonus granted for technical skills found in resume but not requested in JD.</p>
+                                <input type="range" class="form-range" id="weight_bonus" name="weight_bonus" min="0" max="20" value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary-gradient btn-lg px-5" id="submitBtn">
+                            <i class="bi bi-arrow-right-circle"></i> Upload &amp; Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sliders = {
+            'weight_tech': document.getElementById('weight_tech'),
+            'weight_yoe': document.getElementById('weight_yoe'),
+            'weight_context': document.getElementById('weight_context'),
+            'weight_soft': document.getElementById('weight_soft')
+        };
+        const badges = {
+            'weight_tech': document.getElementById('val_tech'),
+            'weight_yoe': document.getElementById('val_yoe'),
+            'weight_context': document.getElementById('val_context'),
+            'weight_soft': document.getElementById('val_soft')
+        };
+        const totalBadge = document.getElementById('totalWeightBadge');
+
+        const presets = {
+            'default': { 'weight_tech': 60, 'weight_yoe': 15, 'weight_context': 15, 'weight_soft': 10 },
+            'balanced': { 'weight_tech': 25, 'weight_yoe': 25, 'weight_context': 25, 'weight_soft': 25 },
+            'strict': { 'weight_tech': 70, 'weight_yoe': 10, 'weight_context': 15, 'weight_soft': 5 },
+            'soft': { 'weight_tech': 20, 'weight_yoe': 20, 'weight_context': 20, 'weight_soft': 40 }
+        };
+
+        const bonusSlider = document.getElementById('weight_bonus');
+        const bonusBadge = document.getElementById('val_bonus');
+
+        function updateBadges() {
+            let total = 0;
+            for (let key in sliders) {
+                let val = parseInt(sliders[key].value);
+                badges[key].textContent = val + "%";
+                total += val;
+            }
+            totalBadge.textContent = "Core Total: " + total + "%";
+            if (total === 100) {
+                totalBadge.classList.replace('bg-danger', 'bg-secondary');
+                totalBadge.classList.replace('bg-warning', 'bg-secondary');
+            } else {
+                totalBadge.classList.replace('bg-secondary', 'bg-warning');
+            }
+        }
+
+        function normalizeSliders(changedKey) {
+            let changedValue = parseInt(sliders[changedKey].value);
+            let remainingSpace = 100 - changedValue;
+            
+            let otherKeys = Object.keys(sliders).filter(k => k !== changedKey);
+            let otherSum = otherKeys.reduce((sum, key) => sum + parseInt(sliders[key].value), 0);
+
+            if (otherSum === 0 && remainingSpace > 0) {
+                // If others are 0, distribute evenly
+                let even = Math.floor(remainingSpace / 3);
+                let remainder = remainingSpace % 3;
+                otherKeys.forEach((k, i) => {
+                    sliders[k].value = even + (i === 0 ? remainder : 0);
+                });
+            } else if (otherSum > 0) {
+                // Scale remaining proportionally
+                otherKeys.forEach(k => {
+                    let currentVal = parseInt(sliders[k].value);
+                    sliders[k].value = Math.round((currentVal / otherSum) * remainingSpace);
+                });
+                
+                // Fix rounding errors to ensure exact 100 sum
+                let newSum = Object.keys(sliders).reduce((s, k) => s + parseInt(sliders[k].value), 0);
+                if (newSum !== 100) {
+                    let diff = 100 - newSum;
+                    let lastKey = otherKeys[otherKeys.length - 1];
+                    let adjusted = parseInt(sliders[lastKey].value) + diff;
+                    sliders[lastKey].value = Math.max(0, adjusted);
+                }
+            }
+            updateBadges();
+        }
+
+        // Bind Sliders
+        for (let key in sliders) {
+            sliders[key].addEventListener('input', function() {
+                normalizeSliders(key);
+            });
+        }
+
+        // Bind Presets
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let presetConfig = presets[this.getAttribute('data-preset')];
+                for (let k in presetConfig) {
+                    sliders[k].value = presetConfig[k];
+                }
+                updateBadges();
+            });
+        });
+        
+        // Bind Bonus Slider Separately (Doesn't affect 100% pool)
+        bonusSlider.addEventListener('input', function() {
+            bonusBadge.textContent = "+" + this.value + "%";
+        });
+        
+        // Initial setup
+        updateBadges();
+        bonusBadge.textContent = "+" + bonusSlider.value + "%";
+    });
+</script>
+{% endblock %}

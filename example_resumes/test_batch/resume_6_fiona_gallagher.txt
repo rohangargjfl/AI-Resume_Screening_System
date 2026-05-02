@@ -1,0 +1,10 @@
+Fiona Gallagher
+Fullstack Python Dev
+
+Experience:
+6 years. Django, React, REST APIs, Docker, AWS. Good teamwork.
+
+Skills:
+Python, Django, React, Docker, AWS, REST APIs
+
+Soft Skills: Communication, Problem Solving, Teamwork

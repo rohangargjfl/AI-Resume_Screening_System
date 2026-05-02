@@ -1,0 +1,40 @@
+RAHUL VERMA
+Backend Engineer
+Email: rahul.verma@email.com | Phone: +91 54321 09876
+GitHub: github.com/rahulverma
+
+PROFESSIONAL SUMMARY
+Backend engineer with 4 years of experience building scalable APIs and microservices. Proficient in Python, Go, and cloud infrastructure. Good teamwork and problem-solving skills.
+
+TECHNICAL SKILLS
+- Languages: Python, Go, Java, SQL, Bash
+- Frameworks: Flask, FastAPI, Spring Boot, gRPC
+- Databases: PostgreSQL, MySQL, Redis, MongoDB, Cassandra
+- Cloud & DevOps: AWS, GCP, Docker, Kubernetes, Terraform, Jenkins, CI/CD, Linux, Git
+- Messaging: Kafka, RabbitMQ
+- Monitoring: Prometheus, Grafana, ELK Stack
+- Other: REST APIs, Microservices, GraphQL, Agile, Scrum
+
+EXPERIENCE
+
+Senior Backend Engineer | ScaleUp Systems, Bengaluru
+Apr 2021 – Present
+- Architected microservices handling 50K+ RPM using Flask and FastAPI
+- Built event-driven systems with Kafka and Redis for real-time data processing
+- Managed Kubernetes clusters on AWS with Terraform and Helm charts
+- Mentored 3 junior engineers and led backend architecture discussions
+
+Backend Developer | ServerLogic Inc, Hyderabad
+Jul 2019 – Mar 2021
+- Developed RESTful and GraphQL APIs using Python and Go
+- Optimised PostgreSQL queries reducing latency by 60%
+- Implemented CI/CD pipelines with Jenkins and GitHub Actions
+- Built monitoring dashboards with Grafana and Prometheus
+
+EDUCATION
+B.Tech in Computer Science — IIIT Hyderabad, 2019 (CGPA: 8.5)
+
+SOFT SKILLS
+- Problem Solving, Communication, Teamwork
+- Leadership, Mentoring, Decision Making
+- Time Management, Adaptability

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}AI Resume Screener — Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-80">
+            <div class="col-lg-6">
+                <div class="hero-badge">
+                    <i class="bi bi-stars"></i> AI‑Powered Recruitment
+                </div>
+                <h1 class="hero-title">
+                    Smart Resume Screening
+                    <span class="gradient-text">& Candidate Ranking</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Leverage NLP and TF‑IDF embeddings to automatically analyse
+                    resumes, match candidates to job descriptions, and rank them —
+                    with full explainability.
+                </p>
+                <div class="hero-actions">
+                    <a href="{{ url_for('main.upload') }}" class="btn btn-primary-gradient btn-lg">
+                        <i class="bi bi-rocket-takeoff"></i> Get Started
+                    </a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-arrow-down-circle"></i> Learn More
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">NLP</span>
+                        <span class="stat-label">SpaCy Pipeline</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">TF‑IDF</span>
+                        <span class="stat-label">+ Embeddings</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">XAI</span>
+                        <span class="stat-label">Explainable AI</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-visual">
+                    <div class="floating-card card-1">
+                        <i class="bi bi-file-earmark-person"></i>
+                        <span>Resume Parsed</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Score: 92%</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Skills Matched</span>
+                    </div>
+                    <div class="hero-circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <h2 class="section-title text-center">How It Works</h2>
+        <p class="section-subtitle text-center">
+            A complete AI pipeline from resume upload to ranked results
+        </p>
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                    <h3>1. Upload</h3>
+                    <p>Upload a job description and multiple candidate resumes (PDF, DOCX, or TXT).</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-cpu"></i></div>
+                    <h3>2. Analyse</h3>
+                    <p>NLP extracts skills, TF‑IDF computes match scores with weighted skill scoring.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-trophy"></i></div>
+                    <h3>3. Rank & Explain</h3>
+                    <p>Candidates are ranked with explainable breakdowns: matched skills, gaps, and charts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack Section -->
+<section class="tech-section">
+    <div class="container">
+        <h2 class="section-title text-center">Tech Stack</h2>
+        <div class="tech-grid">
+            <div class="tech-badge"><i class="bi bi-filetype-py"></i> Python</div>
+            <div class="tech-badge"><i class="bi bi-server"></i> Flask</div>
+            <div class="tech-badge"><i class="bi bi-braces"></i> SpaCy</div>
+            <div class="tech-badge"><i class="bi bi-diagram-3"></i> Transformers</div>
+            <div class="tech-badge"><i class="bi bi-bar-chart"></i> Scikit‑learn</div>
+            <div class="tech-badge"><i class="bi bi-graph-up"></i> Matplotlib</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

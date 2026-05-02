@@ -1,0 +1,38 @@
+SENIOR PYTHON DEVELOPER — JOB DESCRIPTION
+
+Company: TechNova Solutions Pvt. Ltd.
+Location: Bengaluru, India (Hybrid)
+Experience: 3–6 Years
+
+About the Role:
+We are looking for a talented Senior Python Developer to join our AI & Data Engineering team. You will design, build, and maintain backend services and machine learning pipelines that power our intelligent recruitment platform.
+
+Responsibilities:
+- Design and develop RESTful APIs using Flask or FastAPI.
+- Build NLP pipelines for document understanding and information extraction.
+- Develop and deploy machine learning models using scikit-learn, TensorFlow, or PyTorch.
+- Write efficient, well-tested Python code following best practices.
+- Work with relational (PostgreSQL) and NoSQL (MongoDB) databases.
+- Collaborate with frontend engineers, product managers, and data scientists.
+- Containerize services with Docker and deploy on AWS or GCP.
+- Participate in code reviews, sprint planning, and architectural discussions.
+
+Required Skills:
+- Python, Flask, FastAPI
+- Machine Learning, NLP, Deep Learning
+- scikit-learn, TensorFlow, PyTorch
+- SQL, PostgreSQL, MongoDB
+- Docker, Kubernetes, AWS
+- Git, CI/CD, Linux
+- REST APIs, Microservices
+
+Nice to Have:
+- Experience with SpaCy, Hugging Face Transformers
+- Knowledge of Kafka, Airflow, or Spark
+- Familiarity with React or Angular for full-stack contributions
+
+Soft Skills:
+- Strong communication and teamwork
+- Problem solving and analytical thinking
+- Leadership and mentoring ability
+- Time management and adaptability

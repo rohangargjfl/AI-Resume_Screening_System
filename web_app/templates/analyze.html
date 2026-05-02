@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Analyse — AI Resume Screener{% endblock %}
+
+{% block content %}
+<section class="analyze-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="analyze-card text-center">
+                    <div class="analyze-icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h1 id="analyzeTitle">Ready to Analyse</h1>
+                    <p class="text-muted mb-4" id="analyzeSubtitle">
+                        We've received <strong>{{ num_resumes }}</strong> resume(s) and your job description.
+                    </p>
+
+                    <div class="jd-preview" id="jdPreview">
+                        <h6><i class="bi bi-briefcase"></i> JD Preview</h6>
+                        <p>{{ jd_preview }}</p>
+                    </div>
+
+                    <div class="info-badges" id="infoBadges">
+                        <span class="badge bg-primary-subtle text-primary-emphasis">
+                            <i class="bi bi-file-earmark-person"></i> {{ num_resumes }} Resume(s)
+                        </span>
+                        <span class="badge bg-success-subtle text-success-emphasis">
+                            <i class="bi bi-check-circle"></i> Ready
+                        </span>
+                    </div>
+
+                    <button class="btn btn-primary-gradient btn-lg mt-4" id="analyzeBtn" onclick="startAnalysis()">
+                        <i class="bi bi-lightning-charge"></i> Run Analysis
+                    </button>
+
+                    <!-- Progress UI (hidden initially) -->
+                    <div id="progressSection" style="display:none;" class="mt-4">
+                        <div class="progress-ring-container">
+                            <div class="analysis-spinner"></div>
+                        </div>
+                        <p class="status-message mt-3" id="statusMessage">Starting analysis...</p>
+
+                        <div class="progress-steps mt-4" id="progressSteps">
+                            <div class="step-item" data-step="loading_models">
+                                <div class="step-icon"><i class="bi bi-gear"></i></div>
+                                <span>Loading NLP models</span>
+                            </div>
+                            <div class="step-item" data-step="processing_jd">
+                                <div class="step-icon"><i class="bi bi-briefcase"></i></div>
+                                <span>Analysing job description</span>
+                            </div>
+                            <div class="step-item" data-step="processing_resumes">
+                                <div class="step-icon"><i class="bi bi-file-earmark-person"></i></div>
+                                <span>Analysing resumes</span>
+                            </div>
+                            <div class="step-item" data-step="computing_scores">
+                                <div class="step-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                                <span>Computing match scores</span>
+                            </div>
+                            <div class="step-item" data-step="generating_explanations">
+                                <div class="step-icon"><i class="bi bi-lightbulb"></i></div>
+                                <span>Generating explanations</span>
+                            </div>
+                            <div class="step-item" data-step="creating_charts">
+                                <div class="step-icon"><i class="bi bi-bar-chart"></i></div>
+                                <span>Creating visualisations</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error UI (hidden initially) -->
+                    <div id="errorSection" style="display:none;" class="mt-4">
+                        <div class="alert alert-danger" id="errorMessage"></div>
+                        <button class="btn btn-primary-gradient" onclick="window.location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const STEP_ORDER = [
+    'queued', 'loading_models', 'processing_jd',
+    'processing_resumes', 'computing_scores',
+    'generating_explanations', 'creating_charts', 'done'
+];
+
+let pollTimer = null;
+
+function startAnalysis() {
+    const btn = document.getElementById('analyzeBtn');
+    const progress = document.getElementById('progressSection');
+    const jdPreview = document.getElementById('jdPreview');
+    const infoBadges = document.getElementById('infoBadges');
+
+    btn.style.display = 'none';
+    jdPreview.style.display = 'none';
+    infoBadges.style.display = 'none';
+    progress.style.display = 'block';
+
+    document.getElementById('analyzeTitle').textContent = 'Analysing...';
+    document.getElementById('analyzeSubtitle').innerHTML = 'Please wait while our AI processes your documents.';
+
+    fetch('{{ url_for("main.start_analysis") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        pollTimer = setInterval(() => pollStatus(data.job_id), 1500);
+    })
+    .catch(err => showError('Failed to start analysis: ' + err.message));
+}
+
+function pollStatus(jobId) {
+    fetch(`/analysis-status/${jobId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('statusMessage').textContent = data.message;
+            updateSteps(data.status);
+
+            if (data.status === 'done') {
+                clearInterval(pollTimer);
+                document.getElementById('analyzeTitle').textContent = 'Analysis Complete!';
+                document.getElementById('statusMessage').textContent = 'Redirecting to results...';
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("main.results") }}';
+                }, 800);
+            } else if (data.status === 'error') {
+                clearInterval(pollTimer);
+                showError(data.message);
+            }
+        })
+        .catch(err => {
+            clearInterval(pollTimer);
+            showError('Lost connection. Please refresh and try again.');
+        });
+}
+
+function updateSteps(currentStatus) {
+    const currentIdx = STEP_ORDER.indexOf(currentStatus);
+    document.querySelectorAll('.step-item').forEach(el => {
+        const stepStatus = el.dataset.step;
+        const stepIdx = STEP_ORDER.indexOf(stepStatus);
+        el.classList.remove('step-active', 'step-done');
+        if (stepIdx < currentIdx) {
+            el.classList.add('step-done');
+        } else if (stepIdx === currentIdx) {
+            el.classList.add('step-active');
+        }
+    });
+}
+
+function showError(message) {
+    document.getElementById('progressSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'block';
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('analyzeTitle').textContent = 'Analysis Failed';
+}
+</script>
+{% endblock %}

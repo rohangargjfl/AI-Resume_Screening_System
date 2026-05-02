@@ -1,0 +1,10 @@
+Alice Smith
+Python Developer
+
+Experience:
+5 years experience. ML, NLP, Docker, AWS. Built scalable APIs.
+
+Skills:
+Python, ML, NLP, Docker, AWS, REST APIs
+
+Soft Skills: Communication, Problem Solving, Teamwork

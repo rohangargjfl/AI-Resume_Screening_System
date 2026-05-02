@@ -1,0 +1,44 @@
+VIKRAM SINGH
+Data Scientist
+Email: vikram.singh@email.com | Phone: +91 76543 21098
+LinkedIn: linkedin.com/in/vikramsingh
+
+PROFESSIONAL SUMMARY
+Data Scientist with 4 years of experience in machine learning, NLP, and statistical analysis. Skilled in building end-to-end ML pipelines and deploying models at scale. Strong analytical and communication abilities.
+
+TECHNICAL SKILLS
+- Languages: Python, R, SQL
+- ML/AI: scikit-learn, TensorFlow, PyTorch, Keras, NLP, Deep Learning, Computer Vision
+- NLP: SpaCy, NLTK, Hugging Face Transformers, Sentence Transformers
+- Data: Pandas, NumPy, Matplotlib, Seaborn, Tableau, Power BI
+- Big Data: Spark, Hadoop, Kafka, Airflow, ETL
+- Databases: PostgreSQL, MongoDB, Elasticsearch
+- DevOps: Docker, AWS (SageMaker, S3, Lambda), Git, Linux, CI/CD
+
+EXPERIENCE
+
+Data Scientist | AI Analytics Corp, Bengaluru
+Mar 2021 – Present
+- Built NLP models for document classification and named entity recognition using SpaCy and Transformers
+- Developed recommendation systems achieving 25% improvement in user engagement
+- Created automated ML pipelines with Airflow and deployed on AWS SageMaker
+- Designed dashboards with Tableau and Power BI for stakeholder presentations
+
+ML Engineer | DataVerse Labs, Chennai
+Aug 2019 – Feb 2021
+- Implemented deep learning models for image classification using TensorFlow and PyTorch
+- Built data pipelines with Spark and Kafka for real-time stream processing
+- Performed feature engineering and hyperparameter tuning for production models
+- Collaborated with cross-functional teams including product and engineering
+
+EDUCATION
+M.Tech in Data Science — IISc Bangalore, 2019
+B.Tech in Computer Science — BITS Pilani, 2017
+
+PUBLICATIONS
+- "Efficient NER for Indian Languages using Transfer Learning" — AAAI Workshop 2022
+
+SOFT SKILLS
+- Analytical Thinking, Problem Solving, Communication
+- Leadership, Teamwork, Strategic Thinking
+- Presentation, Stakeholder Management

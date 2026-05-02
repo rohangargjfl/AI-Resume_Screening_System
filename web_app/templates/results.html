@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Results Dashboard — AI Resume Screener{% endblock %}
+
+{% block content %}
+<section class="results-section">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="results-header text-center">
+            <h1><i class="bi bi-trophy"></i> Results Dashboard</h1>
+            <p>Candidates ranked by AI match score with full explainability</p>
+            <div class="mt-3">
+                <a href="{{ url_for('main.upload') }}" class="btn btn-primary px-4 shadow-sm">
+                    <i class="bi bi-arrow-repeat me-2"></i> Run New Analysis
+                </a>
+            </div>
+        </div>
+
+        <!-- Custom AI Weights -->
+        {% if custom_weights %}
+        <div class="row justify-content-center mb-4 mt-2">
+            <div class="col-md-10 text-center">
+                <span class="badge bg-secondary rounded-pill me-2 px-3 py-2 mb-2">
+                    <i class="bi bi-cpu"></i> <strong>AI Configuration Applied:</strong>
+                </span>
+                <span class="badge bg-primary rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
+                    Tech Skills: {{ (custom_weights['tech'] * 100)|round|int }}%
+                </span>
+                <span class="badge bg-success rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
+                    Experience: {{ (custom_weights['yoe'] * 100)|round|int }}%
+                </span>
+                <span class="badge bg-info text-dark rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
+                    Context (JD Match): {{ (custom_weights['context'] * 100)|round|int }}%
+                </span>
+                <span class="badge bg-warning text-dark rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
+                    Soft Skills: {{ (custom_weights['soft'] * 100)|round|int }}%
+                </span>
+                <span class="badge border border-success text-success bg-white rounded-pill px-3 py-2 mb-2 shadow-sm">
+                    <i class="bi bi-star-fill"></i> Bonus Cap: +{{ (custom_weights.get('bonus', 0.05) * 100)|round|int }}%
+                </span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Top Candidate Highlight -->
+        {% if explanations %}
+        <div class="top-candidate-card">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    <div class="rank-badge rank-1">
+                        <i class="bi bi-trophy-fill"></i> #1
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>{{ explanations[0].candidate_name }}</h3>
+                    <p class="mb-0 text-muted">Top Ranked Candidate</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="score-display score-lg {% if explanations[0].match_score >= 75 %}score-high{% elif explanations[0].match_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                        {{ explanations[0].match_score }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ranking Table -->
+        <div class="results-card">
+            <div class="results-card-header">
+                <h3><i class="bi bi-list-ol"></i> Candidate Rankings</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table results-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Candidate</th>
+                            <th>Match Score</th>
+                            <th>Skills Match</th>
+                            <th>Soft Skills</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exp in explanations %}
+                        <tr>
+                            <td>
+                                <span class="rank-badge rank-{{ loop.index if loop.index <= 3 else 'other' }}">
+                                    #{{ loop.index }}
+                                </span>
+                            </td>
+                            <td class="fw-semibold">{{ exp.candidate_name }}</td>
+                            <td>
+                                <div class="score-display {% if exp.match_score >= 75 %}score-high{% elif exp.match_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                                    {{ exp.match_score }}%
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-success fw-bold">{{ exp.matched_skills|length }}</span> /
+                                <span class="text-muted">{{ exp.total_jd_skills }}</span>
+                                <div class="progress mt-1" style="height: 4px;">
+                                    <div class="progress-bar bg-success" style="width: {{ exp.skill_match_ratio }}%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info-subtle text-info-emphasis">
+                                    {{ exp.detected_soft_skills|length }} detected
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse"
+                                        data-bs-target="#details-{{ loop.index }}">
+                                    <i class="bi bi-chevron-down"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="collapse" id="details-{{ loop.index }}">
+                            <td colspan="6">
+                                <div class="detail-panel">
+                                    <div class="card bg-light border-0 mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-primary fw-bold mb-3"><i class="bi bi-robot"></i> AI Score Breakdown</h6>
+                                            <div class="row text-center g-2 g-md-3">
+                                                <div class="col-6 col-md">
+                                                    <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-success h-100">
+                                                        <h4 class="mb-1 text-success">{{ exp.breakdown.tech_contribution }}%</h4>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="How many of the strictly required hard technical skills were found.">Tech Skills <i class="bi bi-info-circle"></i></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-info h-100">
+                                                        <h4 class="mb-1 text-info">{{ exp.breakdown.soft_contribution }}%</h4>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="How many of the requested soft skills (leadership, teamwork) were found.">Soft Skills <i class="bi bi-info-circle"></i></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-secondary h-100">
+                                                        <h4 class="mb-1 text-secondary">{{ exp.breakdown.yoe_contribution }}%</h4>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="How closely the candidate's years of experience match the requirements ({{ exp.breakdown.resume_yoe }} Yrs / {{ exp.breakdown.jd_yoe }} Yrs).">Experience <i class="bi bi-info-circle"></i></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-primary h-100">
+                                                        <h4 class="mb-1 text-primary">{{ exp.breakdown.text_contribution }}%</h4>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="Measures how similar the overall phrasing, context, and vocabulary of the resume is to the JD, beyond just exact skills.">Context Match <i class="bi bi-info-circle"></i></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md">
+                                                    <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-warning h-100">
+                                                        <h4 class="mb-1 text-warning">+{{ exp.breakdown.extra_skills_bonus }}%</h4>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="Extra points awarded for highly relevant technical skills found that were not explicitly asked for in the JD.">Bonus <i class="bi bi-info-circle"></i></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="mt-3 mb-0 text-muted small"><i class="bi bi-info-circle"></i> The final score blends keyword-based skill extraction with semantic contextual understanding.</p>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <h6 class="text-success"><i class="bi bi-check-circle"></i> Matched JD Skills</h6>
+                                            <div class="skill-tags">
+                                                {% for skill in exp.matched_skills %}
+                                                    <span class="skill-tag skill-matched">{{ skill }}</span>
+                                                {% endfor %}
+                                                {% if not exp.matched_skills %}
+                                                    <span class="text-muted">None detected</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-danger"><i class="bi bi-x-circle"></i> Missing JD Skills</h6>
+                                            <div class="skill-tags">
+                                                {% for skill in exp.missing_skills %}
+                                                    <span class="skill-tag skill-missing">{{ skill }}</span>
+                                                {% endfor %}
+                                                {% if not exp.missing_skills %}
+                                                    <span class="text-muted">None — great match!</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary"><i class="bi bi-plus-circle"></i> Bonus Tech Skills</h6>
+                                            <div class="skill-tags">
+                                                {% for skill in exp.extra_skills %}
+                                                    <span class="skill-tag skill-soft">{{ skill }}</span>
+                                                {% endfor %}
+                                                {% if not exp.extra_skills %}
+                                                    <span class="text-muted">None detected</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-info"><i class="bi bi-heart"></i> Soft Skills</h6>
+                                            <div class="skill-tags">
+                                                {% for skill in exp.detected_soft_skills %}
+                                                    <span class="skill-tag skill-soft">{{ skill }}</span>
+                                                {% endfor %}
+                                                {% if not exp.detected_soft_skills %}
+                                                    <span class="text-muted">None detected</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-4 mt-2">
+            <div class="col-lg-12">
+                <div class="chart-card">
+                    <h3><i class="bi bi-bar-chart"></i> Candidate Score Comparison</h3>
+                    <img src="data:image/png;base64,{{ score_chart }}" alt="Candidate Score Comparison" class="img-fluid chart-img">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3><i class="bi bi-diagram-3"></i> Skill Distribution</h3>
+                    <img src="data:image/png;base64,{{ skill_chart }}" alt="Skill Distribution" class="img-fluid chart-img">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3><i class="bi bi-heart"></i> Soft Skills</h3>
+                    <img src="data:image/png;base64,{{ soft_chart }}" alt="Soft Skills Distribution" class="img-fluid chart-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- JD Skills Reference -->
+        <div class="results-card mt-4">
+            <div class="results-card-header">
+                <h3><i class="bi bi-briefcase"></i> Required Skills (from JD)</h3>
+            </div>
+            <div class="skill-tags p-3">
+                {% for skill in jd_skills %}
+                    <span class="skill-tag skill-jd">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="text-center mt-4 mb-5">
+            <a href="{{ url_for('main.upload') }}" class="btn btn-primary-gradient btn-lg">
+                <i class="bi bi-arrow-repeat"></i> Analyse New Batch
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+PRIYA PATEL
+Full Stack Developer
+Email: priya.patel@email.com | Phone: +91 87654 32109
+LinkedIn: linkedin.com/in/priyapatel
+
+PROFESSIONAL SUMMARY
+Full stack developer with 3 years of experience in web development and basic machine learning. Eager to transition into AI and backend-focused roles. Strong problem-solving and collaboration skills.
+
+TECHNICAL SKILLS
+- Languages: Python, JavaScript, TypeScript, HTML, CSS
+- Frameworks: React, Node.js, Express, Django, Flask
+- Databases: MySQL, MongoDB, SQLite
+- Cloud: AWS (EC2, S3), Docker, Git, Linux
+- ML Basics: scikit-learn, Pandas, NumPy, Matplotlib
+- Other: REST APIs, Agile, Scrum, Jira
+
+EXPERIENCE
+
+Software Developer | WebCraft Digital, Pune
+Jul 2021 – Present
+- Built responsive web applications using React and Node.js
+- Developed REST APIs with Flask and Django for client projects
+- Implemented basic ML models for customer churn prediction using scikit-learn
+- Managed deployments on AWS EC2 with Docker
+
+Junior Developer | AppForge, Mumbai
+Jan 2020 – Jun 2021
+- Developed frontend components with React and Bootstrap
+- Wrote Python scripts for data cleaning and reporting
+- Participated in daily standups and sprint retrospectives
+
+EDUCATION
+B.Tech in Information Technology — NIT Surat, 2020 (CGPA: 8.2)
+
+PROJECTS
+- Sentiment Analysis Dashboard: Built a Flask app with NLP for tweet sentiment classification
+- E-commerce Platform: Full stack React + Django application with payment integration
+
+SOFT SKILLS
+- Communication, Teamwork, Collaboration
+- Problem Solving, Adaptability, Creativity
+- Time Management
