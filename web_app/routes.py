@@ -83,9 +83,22 @@ def allowed_file(filename: str) -> bool:
 #  Background Analysis Worker
 # ------------------------------------------------------------------ #
 
-def _run_analysis(job_id: str, jd_text: str, resumes: list[dict], weights: dict = None):
+def _run_analysis(job_id: str, jd_text: str, raw_resumes: list[dict], weights: dict = None):
     """Run the full NLP + matching pipeline in a background thread."""
     try:
+        # ----- Parse Resumes (potentially slow OCR — runs in background) -----
+        _job_store[job_id]['status'] = 'parsing_resumes'
+        _job_store[job_id]['message'] = f'Parsing {len(raw_resumes)} resume(s)...'
+
+        resumes = []
+        for rf in raw_resumes:
+            try:
+                text = parser.parse_bytes(rf['bytes'], rf['filename'])
+            except Exception as e:
+                text = ''
+            name = os.path.splitext(rf['filename'])[0].replace('_', ' ').replace('-', ' ').title()
+            resumes.append({'name': name, 'text': text})
+
         _job_store[job_id]['status'] = 'loading_models'
         _job_store[job_id]['message'] = 'Loading NLP models...'
 
@@ -186,30 +199,29 @@ def home():
 @login_required_decorator
 def upload():
     if request.method == 'POST':
-        # --- Job Description ---
+        # --- Job Description (text only — JD is short, safe to parse synchronously) ---
         jd_text = request.form.get('job_description', '').strip()
         jd_file = request.files.get('jd_file')
 
         if jd_file and jd_file.filename and allowed_file(jd_file.filename):
+            # JD is usually a plain text/docx — safe to parse here
             jd_text = parser.parse_bytes(jd_file.read(), jd_file.filename)
         elif not jd_text:
             flash('Please provide a job description (text or file).', 'danger')
             return redirect(url_for('main.upload'))
 
-        # --- Resumes ---
+        # --- Resumes — store raw bytes; heavy OCR parsing happens in background thread ---
         resume_files = request.files.getlist('resumes')
         if not resume_files or not resume_files[0].filename:
             flash('Please upload at least one resume.', 'danger')
             return redirect(url_for('main.upload'))
 
-        resumes_data: list[dict] = []
+        raw_resumes: list[dict] = []
         for rf in resume_files:
             if rf and rf.filename and allowed_file(rf.filename):
-                raw_text = parser.parse_bytes(rf.read(), rf.filename)
-                name = os.path.splitext(rf.filename)[0].replace('_', ' ').replace('-', ' ').title()
-                resumes_data.append({'name': name, 'text': raw_text})
+                raw_resumes.append({'bytes': rf.read(), 'filename': rf.filename})
 
-        if not resumes_data:
+        if not raw_resumes:
             flash('No valid resume files uploaded.', 'danger')
             return redirect(url_for('main.upload'))
 
@@ -222,7 +234,7 @@ def upload():
             w_bonus = float(request.form.get('weight_bonus', 5))
         except ValueError:
             w_tech, w_yoe, w_context, w_soft, w_bonus = 60.0, 15.0, 15.0, 10.0, 5.0
-            
+
         total_w = w_tech + w_yoe + w_context + w_soft
         if total_w == 0:
             weights = {'tech': 0.60, 'yoe': 0.15, 'context': 0.15, 'soft': 0.10, 'bonus': 0.05}
@@ -239,7 +251,7 @@ def upload():
         data_id = str(uuid.uuid4())
         _data_store[data_id] = {
             'jd_text': jd_text,
-            'resumes': resumes_data,
+            'raw_resumes': raw_resumes,
             'weights': weights
         }
         session['data_id'] = data_id
@@ -259,10 +271,10 @@ def analyze():
         return redirect(url_for('main.upload'))
 
     jd_text = data['jd_text']
-    resumes = data['resumes']
+    raw_resumes = data.get('raw_resumes', [])
     return render_template('analyze.html',
                            jd_preview=jd_text[:300] + ('...' if len(jd_text) > 300 else ''),
-                           num_resumes=len(resumes))
+                           num_resumes=len(raw_resumes))
 
 
 # ------------------------------------------------------------------ #
@@ -285,10 +297,10 @@ def start_analysis():
         'message': 'Starting analysis...',
     }
 
-    # Launch background thread
+    # Launch background thread (passes raw bytes; parsing happens inside thread)
     thread = threading.Thread(
         target=_run_analysis,
-        args=(job_id, data['jd_text'], data['resumes'], data.get('weights')),
+        args=(job_id, data['jd_text'], data['raw_resumes'], data.get('weights')),
         daemon=True,
     )
     thread.start()
