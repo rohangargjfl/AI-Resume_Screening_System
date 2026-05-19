@@ -181,14 +181,15 @@ class ResumeParser:
         fname = os.path.basename(path)
         logger.info(f"[EXTRACTION: IMAGE-OCR] '{fname}' — Trying dots.mocr OCR...")
 
-        try:
-            from resume_parser.dots_mocr_provider import ocr_image
-            text = ocr_image(path)
-            if text.strip():
-                logger.info(f"[EXTRACTION: IMAGE-OCR ✓] '{fname}' — dots.mocr extracted {len(text.strip())} chars.")
-                return text
-        except Exception as e:
-            logger.warning(f"[EXTRACTION: IMAGE-OCR ✗] '{fname}' — dots.mocr failed ({e}). Falling back to Tesseract.")
+        if os.environ.get('DISABLE_DOTS_MOCR') != '1':
+            try:
+                from resume_parser.dots_mocr_provider import ocr_image
+                text = ocr_image(path)
+                if text.strip():
+                    logger.info(f"[EXTRACTION: IMAGE-OCR ✓] '{fname}' — dots.mocr extracted {len(text.strip())} chars.")
+                    return text
+            except Exception as e:
+                logger.warning(f"[EXTRACTION: IMAGE-OCR ✗] '{fname}' — dots.mocr failed ({e}). Falling back to Tesseract.")
 
         # Fallback to Tesseract
         from PIL import Image as PILImage
@@ -209,14 +210,15 @@ class ResumeParser:
         fname = os.path.basename(path)
         logger.info(f"[EXTRACTION: PDF-OCR] '{fname}' — Trying dots.mocr OCR...")
         
-        try:
-            from resume_parser.dots_mocr_provider import ocr_pdf
-            text = ocr_pdf(path)
-            if text.strip():
-                logger.info(f"[EXTRACTION: PDF-OCR ✓] '{fname}' — dots.mocr extracted {len(text.strip())} chars.")
-                return text
-        except Exception as e:
-            logger.warning(f"[EXTRACTION: PDF-OCR ✗] '{fname}' — dots.mocr failed ({e}). Falling back to Tesseract.")
+        if os.environ.get('DISABLE_DOTS_MOCR') != '1':
+            try:
+                from resume_parser.dots_mocr_provider import ocr_pdf
+                text = ocr_pdf(path)
+                if text.strip():
+                    logger.info(f"[EXTRACTION: PDF-OCR ✓] '{fname}' — dots.mocr extracted {len(text.strip())} chars.")
+                    return text
+            except Exception as e:
+                logger.warning(f"[EXTRACTION: PDF-OCR ✗] '{fname}' — dots.mocr failed ({e}). Falling back to Tesseract.")
 
         from pdf2image import convert_from_path
 

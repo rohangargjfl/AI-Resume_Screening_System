@@ -23,6 +23,13 @@ def _load_model():
     import sys
     import types
     
+    try:
+        from huggingface_hub import try_to_load_from_cache
+        if not try_to_load_from_cache("rednote-hilab/dots.mocr", "config.json"):
+            logger.warning("[dots.mocr] Model 'rednote-hilab/dots.mocr' is not cached! This will trigger a ~6-7GB download.")
+    except ImportError:
+        pass
+    
     # Workaround 1: Mock sys.modules so the custom code's hard imports don't fail
     if "flash_attn" not in sys.modules:
         mock_fa = types.ModuleType("flash_attn")
@@ -44,8 +51,15 @@ def _load_model():
             raise e
     transformers.dynamic_module_utils.check_imports = patched_check_imports
     
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    if torch.cuda.is_available():
+        device = "cuda"
+        dtype = torch.bfloat16
+    elif torch.backends.mps.is_available():
+        device = "mps"
+        dtype = torch.float16
+    else:
+        device = "cpu"
+        dtype = torch.float32
     logger.info(f"[dots.mocr] Loading model on {device} (this takes ~30 sec first time, plus download time if not cached)...")
     
     model_id = "rednote-hilab/dots.mocr"
@@ -53,7 +67,7 @@ def _load_model():
     _model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=dtype,
-        device_map="auto" if device == "cuda" else None,
+        device_map="auto" if device != "cpu" else None,
         trust_remote_code=True,
     )
     if device == "cpu":
@@ -66,7 +80,10 @@ def _load_model():
 
 def ocr_image(image_path: str) -> str:
     """Run dots.mocr on a single image, return plain text."""
-    from qwen_vl_utils import process_vision_info
+    try:
+        from qwen_vl_utils import process_vision_info
+    except ImportError:
+        raise RuntimeError("qwen-vl-utils is missing. Run: pip install qwen-vl-utils")
 
     model, processor = _load_model()
     device = next(model.parameters()).device
