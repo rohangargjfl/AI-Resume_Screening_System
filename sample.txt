@@ -1,0 +1,20 @@
+John Doe
+Backend Software Engineer
+
+Professional Summary
+Dedicated Backend Developer with over 3 years of experience in designing, building, and maintaining scalable web applications. Recognized for strong leadership and excellent communication skills when collaborating with cross-functional teams.
+
+Technical Skills
+• Languages & Frameworks: Python, Django, JavaScript
+• Databases: PostgreSQL, Redis
+• API & Cloud: REST, Docker, AWS, Git
+
+Work Experience
+Backend Engineer | Tech Solutions Inc. | 2022 – Present
+- Developed and maintained secure web services using Python and Django.
+- Managed database schemas, optimized complex queries in PostgreSQL, and improved API response times.
+- Mentored junior developers and provided technical leadership on core projects.
+
+Education
+Bachelor of Technology in Computer Science
+XYZ University, Graduated 2021

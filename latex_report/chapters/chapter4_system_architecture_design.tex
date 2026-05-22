@@ -1,0 +1,112 @@
+\chapter{SYSTEM ARCHITECTURE AND DESIGN}
+
+For this project, the methodology used is the creation of the very flexible and modularized pipeline process flow. It entails the engineering approach of extracting noisy data from the documents, organizing the data in JSON format, running the data into the mathematical scoring engine and then finally visualization of the results via the interactive dashboard.
+
+\section{Overall Architecte}
+The architectural design utilizes a synchronous approach in that the light-weight Flask backend server is used. After the uploading of the resumes in bulk together with the corresponding Job Description (JD), the system begins the process of asynchronous multi-threading algorithm without blocking any user interfaces. The five core modules of the asynchronous multi-threading algorithm include the Parsing Engine, NLP Extraction Engine, Mathematical Scoring Engine, XAI Explainer, and Visualization Dashboard.
+
+In this architectural design, every resume must pass through the process of normalization and feature extraction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{project_flowchart.png}
+    \caption{AI-Powered Resume Screening and Matching Architecture}
+    \label{fig:project-flowchart}
+\end{figure}
+
+\section{File Parsing and OCR Fallback Pipeline}
+Elimination of any format-based bias is a primary goal of the parsing engine module, which takes raw binary files as input and tries to parse their content through the most efficient algorithms before resorting to more complex computer vision techniques.
+
+\begin{enumerate}
+    \item \textbf{Digital Extraction:} For .docx files, the python-docx library reads the underlying XML trees. For digital .pdf files, PyPDF2 traverses the binary object streams.
+    \item \textbf{OCR Fallback Validation:} If the digital extraction yields fewer than 50 characters, the system assumes the PDF is an unsearchable scanned image or a heavily protected format.
+    \item \textbf{Pillow and Tesseract OCR:} Image formats (.png, .jpg) and failed PDFs are routed directly to the Tesseract OCR engine. To maximize optical recognition accuracy, the Pillow library applies a series of localized preprocessing filters:
+\end{enumerate}
+
+\begin{itemize}
+    \item \textbf{Grayscale Conversion:} Reduces RGB channel noise.
+    \item \textbf{Binarization:} Black/white thresholding of pixel values for sharper contrast between the font and the background color.
+    \item \textbf{Sharpening:} Performs edge enhancement using a convolution kernel prior to the mapping process for the characters. 
+\end{itemize}
+
+\textbf{Algorithm 1: Resume Parsing and OCR Fallback Validation}
+
+\begin{verbatim}
+FUNCTION ParseDocument(file, extension):
+    IF extension == ".txt":
+        return read_text(file)
+    ELSE IF extension == ".pdf":
+        text = PyPDF2_extract(file)
+        IF length(text) < 50:
+            image = convert_pdf_to_image(file)
+            return OCR_Pipeline(image)
+        return text
+    ELSE IF extension == ".png" OR ".jpg":
+        return OCR_Pipeline(file)
+
+FUNCTION OCR_Pipeline(image):
+    gray_img = apply_grayscale(image)
+    binary_img = apply_binarization(gray_img)
+    sharp_img = apply_sharpening(binary_img)
+    return Tesseract_Extract_Text(sharp_img)
+\end{verbatim}
+
+\section{Natural Language Processing (NLP) Module}
+The uniform, lowercase text string generated from the parse pipeline process is then processed by the SpaCy NLP module, using the en\_core\_web\_sm model.
+
+\begin{itemize}
+    \item \textbf{Tokenization and Stop-words Elimination:} Grammatical elements, like ``and'', ``the'', and ``is'', are discarded in order to extract nouns and verbs of high value.
+    \item \textbf{Entities Extraction:} This component makes use of an ontology of technical entities, such as ``Python'', ``AWS'', and ``Docker'', as well as soft skill entities, like ``Leadership'' and ``Communication''.
+    \item \textbf{Years of Experience (YoE):} Using advanced Regex expressions, the module searches for chronology indicators, such as ``Aug 2018 - Present'', or direct assertions, like ``5 years of experience'', to compute the number of years an applicant has been working in their field.
+\end{itemize}
+
+\section{Vectorization and Similarity Computation}
+Whereas explicit entity matching addresses the strict technical requirements, statistical machine learning is leveraged to determine broader context relevancy. To that end, both the processed CV and JD are vectorized by means of scikit-learn’s TfidfVectorizer algorithm.
+
+Due to the Term Frequency-Inverse Document Frequency (TF-IDF) technique, rare and more specific words such as Kubernetes will weigh much higher mathematically than generic industry-specific vocabulary words such as developer, thus preventing candidates from getting high scores for merely repeating common words.
+
+Finally, the cosine similarity between the two vectors is calculated via the following formula:
+
+\begin{equation}
+\text{Cosine Similarity}(A,B)=\frac{A \cdot B}{\|A\|\|B\|}
+\end{equation}
+
+where \(A\) represents the Resume TF-IDF vector, and \(B\) represents the Job Description TF-IDF vector.
+
+\section{The Weighted Scoring Engine}
+In order to avoid having keyword stuffing affect the output, the system employs a weighted scoring system with an upper bound as opposed to a simplistic averaging system. The weights can be adjusted by the recruiter on the frontend in real-time. The default weights assumed by the system are \(W_{tech}=0.60\), \(W_{soft}=0.10\), \(W_{yoe}=0.15\), and \(W_{context}=0.15\).
+
+\begin{equation}
+W_{tech}+W_{soft}+W_{yoe}+W_{context}=1.0
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+\text{Final Score} ={}&
+(\text{Tech Score} \times W_{tech}) +
+(\text{Soft Score} \times W_{soft})\\
+&+(\text{YoE Score} \times W_{yoe}) +
+(\text{Context Score} \times W_{context})\\
+&+\text{Extra Skills Bonus}
+\end{aligned}
+\end{equation}
+
+\textbf{Algorithm 2: Extra Skills Bonus Math}
+
+To reward candidates possessing adjacent technical skills not explicitly requested in the job description, an additive bonus is applied. Crucially, this bonus is strictly capped to prevent runaway score inflation and boundary breaking.
+
+\begin{footnotesize}
+\begin{verbatim}
+FUNCTION CalculateBonus(resume_skills, jd_skills, max_bonus_weight):
+    extra_skills = set(resume_skills) - set(jd_skills)
+    raw_bonus = length(extra_skills) * (max_bonus_weight / 10)
+    final_bonus = MIN(raw_bonus, max_bonus_weight)
+    return final_bonus
+\end{verbatim}
+\end{footnotesize}
+
+Whereby an additive bonus is awarded to candidates having similar skills that were not expressly listed in the job posting, but are required nonetheless, the candidate receives an added bonus, which however should be strictly limited to stop score inflation.
+
+In the \texttt{Explainable\_AI} module, the algorithm converts computational vectors back into understandable, deterministic vectors. This module necessarily classifies candidates according to four buckets of confidence: High, Medium, Partial, and Low.
+
+In the method \texttt{Explainer.explain()}, the machine intercepts the mathematics-based dictionary produced by the matching engine and uses a templating engine to generate a justification. The mappings will specify exact numbers, like “Matched 2 out of 4 required skills” and list specific missing skills, making HR auditing absolutely certain.

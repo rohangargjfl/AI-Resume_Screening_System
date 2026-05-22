@@ -12,6 +12,8 @@ TECHNICAL_SKILLS = {
     'matlab', 'sql', 'html', 'css', 'julia', 'haskell', 'lua', 'bash', 'shell', 
     'powershell', 'assembly', 'dart', 'solidity', 'groovy', 'clojure', 'elixir', 
     'f#', 'fortran', 'cobol', 'lisp', 'prolog', 'vhdl', 'verilog', 'sas', 'vba',
+    'objective-c', 'delphi', 'pascal', 'abap', 'apex', 'crystal', 'nim', 'racket', 
+    'scheme', 'awk', 'sed',
     'object oriented programming', 'oop', 'functional programming', 'scripting',
 
     # -----------------------------------------------------
@@ -22,6 +24,9 @@ TECHNICAL_SKILLS = {
     'bootstrap', 'tailwind', 'tailwindcss', 'material ui', 'mui', 'chakra ui', 
     'styled components', 'jquery', 'sass', 'less', 'webpack', 'babel', 'vite',
     'flutter', 'ios', 'android', 'xamarin', 'ionic', 'cordova', 'electron',
+    'solidjs', 'preact', 'alpinejs', 'lit', 'stencil', 'rxjs', 'redux', 'mobx', 
+    'zustand', 'recoil', 'formik', 'yup', 'zod', 'capacitor', 'phonegap', 
+    'ant design', 'bulma', 'foundation', 'mantine',
 
     # -----------------------------------------------------
     # 3. Backend Frameworks & Architectures
@@ -32,6 +37,10 @@ TECHNICAL_SKILLS = {
     'microservices', 'monolith', 'serverless', 'event-driven architecture',
     'rest', 'restful', 'graphql', 'grpc', 'soap', 'websocket', 'socket.io', 
     'webhook', 'api', 'apis', 'mvc', 'mvvm',
+    'nestjs', 'koa', 'hapi', 'fastify', 'sails', 'meteor', 'strapi', 'trpc', 
+    'django rest framework', 'celery', 'marshmallow', 'sqlalchemy', 'prisma', 
+    'typeorm', 'sequelize', 'mongoose', 'hibernate', 'spring mvc', 'play framework', 
+    'gin', 'fiber', 'echo', 'actix', 'rocket', 'phoenix',
 
     # -----------------------------------------------------
     # 4. Databases & Data Stores (SQL, NoSQL, Vector)
@@ -40,6 +49,8 @@ TECHNICAL_SKILLS = {
     'cassandra', 'dynamodb', 'elasticsearch', 'neo4j', 'firebase', 'supabase', 
     'nosql', 'graphdb', 'sql server', 'mariadb', 'cockroachdb', 'couchdb', 
     'arango', 'memcached', 'cosmos db', 'riak',
+    'db2', 'informix', 'sybase', 'teradata', 'hana', 'documentdb', 'scylladb', 
+    'hbase', 'couchbase', 'influxdb', 'timescaledb', 'clickhouse', 'druid', 'pinot',
     # Vector DBs
     'pinecone', 'weaviate', 'chromadb', 'milvus', 'faiss', 'qdrant', 'zilliz',
 
@@ -47,16 +58,20 @@ TECHNICAL_SKILLS = {
     # 5. Cloud, DevOps, CI/CD, & Infrastructure
     # -----------------------------------------------------
     'aws', 'amazon web services', 'azure', 'gcp', 'google cloud', 'digitalocean', 
-    'heroku', 'vercel', 'netlify', 'cloud computing',
+    'heroku', 'vercel', 'netlify', 'cloud computing', 'cloudflare',
     'docker', 'kubernetes', 'k8s', 'docker compose', 'helm', 
     'jenkins', 'terraform', 'ansible', 'chef', 'puppet', 'ci/cd', 'cicd', 
     'github actions', 'circleci', 'travis ci', 'gitlab ci', 'bitbucket pipelines',
-    'linux', 'unix', 'ubuntu', 'centos', 'debian', 'redhat',
+    'linux', 'unix', 'ubuntu', 'centos', 'debian', 'redhat', 'macos', 'windows',
     'git', 'github', 'gitlab', 'bitbucket', 'svn', 'version control',
     'nginx', 'apache', 'iis', 'tomcat', 'caddy',
     'lambda', 'ec2', 's3', 'ecs', 'eks', 'sagemaker', 'vertex ai', 'cloudformation',
     'prometheus', 'grafana', 'datadog', 'new relic', 'splunk', 'elk stack',
     'istio', 'service mesh', 'vault', 'consul',
+    'argocd', 'flux', 'spinnaker', 'tekton', 'waypoint', 'nomad', 'packer', 
+    'vagrant', 'pulumi', 'aws cdk', 'serverless framework', 'localstack', 
+    'jaeger', 'zipkin', 'opentelemetry', 'kibana', 'logstash', 'filebeat', 
+    'fluentd', 'nagios', 'zabbix', 'pagerduty', 'opsgenie',
 
     # -----------------------------------------------------
     # 6. Data Engineering & Big Data
@@ -67,6 +82,10 @@ TECHNICAL_SKILLS = {
     'flink', 'beam', 'kinesis', 'sqs', 'sns', 'rabbitmq', 'activemq',
     'tableau', 'power bi', 'looker', 'metabase', 'qlik', 'superset',
     'data warehousing', 'data lakes', 'data modeling',
+    'apache airflow', 'prefect', 'dagster', 'apache spark', 'apache flink', 
+    'apache beam', 'apache storm', 'apache samza', 'apache nifi', 'apache kafka', 
+    'confluent', 'debezium', 'fivetran', 'airbyte', 'stitch', 'synapse', 
+    'delta lake', 'apache iceberg', 'apache hudi', 'trino', 'presto', 'hive', 'pig',
 
     # -----------------------------------------------------
     # 7. AI, Machine Learning & MLOps
@@ -85,6 +104,9 @@ TECHNICAL_SKILLS = {
     'recommendation systems', 'ab testing', 'a/b testing',
     'mlops', 'mlflow', 'kubeflow', 'wandb', 'weights and biases', 
     'experiment tracking', 'model evaluation', 'model deployment',
+    'dvc', 'seldon', 'ray', 'horovod', 'optuna', 'hyperopt', 'diffusers', 
+    'yolo', 'mediapipe', 'fastai', 'pytorch lightning', 'haiku', 'tensorrt', 
+    'onnx', 'openvino', 'coreml',
 
     # -----------------------------------------------------
     # 8. Generative AI & Large Language Models (LLMs)
@@ -100,6 +122,7 @@ TECHNICAL_SKILLS = {
     'generative ai', 'genai', 'agentic', 'agentic ai', 'ai agents',
     'embeddings', 'vectorization', 'semantic search',
     'lora', 'qlora', 'peft', 'quantization', 'gguf', 'llama.cpp', 'vllm',
+    'ollama', 'tgi', 'text-generation-inference', 'auto-gpt', 'babyagi',
 
     # -----------------------------------------------------
     # 9. Cybersecurity & Networking
@@ -109,9 +132,13 @@ TECHNICAL_SKILLS = {
     'jwt', 'owasp', 'vulnerability assessment', 'incident response', 'firewalls',
     'tcp/ip', 'dns', 'http', 'https', 'ftp', 'ssh', 'vpn', 'load balancing',
     'wireshark', 'nmap', 'kali linux', 'metasploit', 'burp suite',
+    'soc', 'siem', 'soar', 'edr', 'xdr', 'mdm', 'pam', 'zero trust', 'sast', 
+    'dast', 'sca', 'osint', 'malware analysis', 'reverse engineering', 'ghidra', 
+    'ida pro', 'radare2', 'cobalt strike', 'bloodhound', 'nessus', 'qualys', 
+    'openvas', 'fortinet', 'palo alto', 'cisco', 'juniper', 'qradar', 'arcsight',
 
     # -----------------------------------------------------
-    # 10. Software Engineering Practices & Tools
+    # 10. Software Engineering Practices & QA/Testing
     # -----------------------------------------------------
     'system design', 'design patterns', 'solid principles', 'dry', 'kiss',
     'tdd', 'bdd', 'unit testing', 'integration testing', 'e2e testing',
@@ -119,6 +146,10 @@ TECHNICAL_SKILLS = {
     'data structures', 'algorithms', 'dsa', 'competitive programming', 'leetcode',
     'agile', 'scrum', 'kanban', 'sprint', 'jira', 'confluence', 'trello', 'asana',
     'linux kernel', 'os development', 'embedded systems', 'iot', 'arduino', 'raspberry pi',
+    'postman', 'soapui', 'rest assured', 'jmeter', 'gatling', 'locust', 'k6', 
+    'appium', 'espresso', 'xcuitest', 'browserstack', 'sauce labs', 'testng', 
+    'junit', 'nunit', 'xunit', 'regex', 'regular expressions', 'json', 'xml', 
+    'yaml', 'toml', 'csv',
 
     # -----------------------------------------------------
     # 11. UI/UX, Design, & Product
@@ -149,13 +180,15 @@ SOFT_SKILLS = {
     'presentation', 'storytelling', 'active listening', 'negotiation', 'persuasion',
     'interpersonal', 'empathy', 'emotional intelligence', 'eq', 'networking',
     'stakeholder management', 'client facing', 'customer service', 'collaboration',
+    'public relations', 'media relations',
     
     # -----------------------------------------------------
     # Teamwork & Leadership
     # -----------------------------------------------------
     'teamwork', 'team player', 'leadership', 'team management', 'mentoring', 
     'coaching', 'conflict resolution', 'cross functional', 'cross-functional',
-    'delegation', 'team building', 'motivation',
+    'delegation', 'team building', 'motivation', 'conflict management', 
+    'change management', 'crisis management',
     
     # -----------------------------------------------------
     # Problem Solving & Critical Thinking
@@ -164,6 +197,7 @@ SOFT_SKILLS = {
     'troubleshooting', 'decision making', 'logical reasoning', 'strategic thinking',
     'innovation', 'creativity', 'creative problem solving', 'brainstorming',
     'research', 'data-driven', 'detail oriented', 'detail-oriented', 'attention to detail',
+    'process improvement', 'six sigma', 'lean management',
     
     # -----------------------------------------------------
     # Work Ethic & Personal Attributes
@@ -175,9 +209,14 @@ SOFT_SKILLS = {
     'growth mindset', 'curiosity',
     
     # -----------------------------------------------------
-    # Management & Organization
+    # Management, Business & Organization
     # -----------------------------------------------------
     'time management', 'project management', 'organizational', 'multitasking',
     'prioritization', 'planning', 'scheduling', 'resource management',
     'risk management', 'event management', 'documentation', 'writing',
+    'agile methodology', 'scrum management', 'client relations', 'vendor management', 
+    'strategic planning', 'budgeting', 'financial modeling', 'business development', 
+    'market research', 'competitive analysis', 'contract negotiation', 'quality assurance', 
+    'brand management', 'account management', 'customer success', 'customer retention', 
+    'sales forecasting', 'lead generation', 'b2b sales', 'b2c sales',
 }

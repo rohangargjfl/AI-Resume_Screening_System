@@ -1,0 +1,90 @@
+% -------- Packages --------
+\usepackage[
+  a4paper,
+  top=2.2cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=2.5cm,
+  headheight=14pt,
+  headsep=0.4cm
+]{geometry}
+
+\usepackage{fontspec}
+\usepackage{anyfontsize}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{placeins}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xurl}
+
+% -------- Spacing --------
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+% -------- Chapter Formatting --------
+\titlespacing*{\chapter}
+{0pt}
+{0pt}
+{20pt}
+
+\titlespacing*{\section}
+{0pt}
+{8pt}
+{4pt}
+
+\titlespacing*{\subsection}
+{0pt}
+{6pt}
+{3pt}
+
+\titleformat{\chapter}[block]
+{\normalfont\bfseries\Large}{\thechapter.}{1em}{}
+
+% Front-matter headings such as Declaration, Certificate, Acknowledgement,
+% Abstract, Contents, List of Tables, List of Figures, and Abbreviations.
+\titleformat{name=\chapter,numberless}[block]
+{\normalfont\bfseries\Large\centering}{}{0pt}{}
+
+% -------- Tables --------
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% -------- Figure Path --------
+\graphicspath{{figures/}}
+
+% -------- Hyperref --------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue
+}
+
+% -------- Helper Commands --------
+\newcommand{\studentone}{Rohan Garg}
+\newcommand{\studentoneroll}{2K22/CO/375}
+\newcommand{\studenttwo}{Punit Sukhani}
+\newcommand{\studenttworoll}{2K22/CO/353}
+\newcommand{\studentthree}{Saksham}
+\newcommand{\studentthreeroll}{2K22/CO/395}
+\newcommand{\projecttitle}{AI in Recruitment Process: A Study on the Use of AI for Resume Analysis}
+\newcommand{\projectguide}{Mrs. Gull Kaur}
+\newcommand{\supervisordesignation}{Assistant Professor}
+\newcommand{\department}{Department of Computer Science and Engineering}
+\newcommand{\university}{Delhi Technological University}
+\newcommand{\reportmonth}{May 2026}

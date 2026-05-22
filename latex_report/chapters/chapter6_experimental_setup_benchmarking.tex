@@ -1,0 +1,109 @@
+\chapter{EXPERIMENTAL SETUP AND BENCHMARKING}
+
+Five benchmarking tests have been carried out to assess the prototype. These tests set operational constraints, ensure resistance to attacks using adversarial samples, and measure the tradeoffs between lexical and semantic architectures of LLMs.
+
+\section{Benchmark 1: Format Bias and OCR Failover Resilience}
+Objective: To find out whether the tool discriminates candidates by penalizing them based on the format they submit their resume in, and to verify the effectiveness of the fallback OCR pipeline using Tesseract.
+
+Setup: Standard text data from a candidate was stored in three different formats, namely a clean .txt document, an electronic .pdf document, and an image .png document. The JD needed identical skills for all the three cases.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark 1: Format Bias and OCR Failover Resilience}
+\begin{tabularx}{\textwidth}{p{0.17\textwidth}p{0.22\textwidth}Y p{0.16\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{File Type} & \textbf{Parsing Pipeline Used} & \textbf{Raw Text Extraction Status} & \textbf{System Context Score} & \textbf{Final System Score}\\
+\midrule
+sample.txt & Digital / Native & Clean strings, perfect logical spacing & 66.0\% & 90.5\%\\
+sample.pdf & Digital / PyPDF2 & Minor spacing token loss, e.g., ``softwareengineer'' & 65.5\% & 90.0\%\\
+sample.png & OCR / Tesseract & Accurate text recovery post-binarization & 56.8\% & 90.5\%\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Methodology and Analysis: The OCR fallback pipeline is successful. By applying Grayscale \(\rightarrow\) Binarization \(\rightarrow\) Sharpening, the vision engine recovered text so effectively that the image-based .png file scored identically (90.5\%) to the native text file. The slight PDF drop (90.0\%) highlights digital PDF parsers losing whitespace tokens, underscoring the need for regex logic that can interpret concatenated strings.
+
+\section{Benchmark 2: Dilution and Keyword Stuffing Resistance}
+Objective: Assess the robustness of the algorithm score in resisting keyword stuffing and dilution with meaningless text verbosity.
+
+Test Setup: The Job Description was strictly set to test for only four competencies: ['django', 'postgresql', 'python', 'rest']. Profiles were created as follows: a Base Profile, a Verbosely Inflated Profile with extra irrelevant hobbies, and a Stuffed Profile where the resume contained multiple copies of the JD in invisible text.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark 2: Dilution and Keyword Stuffing Resistance}
+\begin{tabularx}{\textwidth}{p{0.28\textwidth}p{0.22\textwidth}p{0.25\textwidth}p{0.18\textwidth}}
+\toprule
+\textbf{Profile Type} & \textbf{Tech Score (Regex)} & \textbf{Context Score (TF-IDF Sensitivity)} & \textbf{Final System Score}\\
+\midrule
+Baseline Profile & 100.0\% & 57.3\% & 93.6\%\\
+Verbose Profile (Dilution) & 100.0\% & 19.0\% & 87.8\%\\
+Keyword Stuffer (Cheater) & 100.0\% & 37.4\% & 90.6\%\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Methods and Analysis: This experiment shows that the TF-IDF algorithm punishes the Verbose cheat with a lower context score, lowering their score from 57.3\% to 19.0\%, as the relevant words get buried among irrelevant ones. In turn, for the Keyword Stuffer cheat, sub-linear term frequency keeps their context score from being 100\%, keeping their cheating under control by setting the final score to 90.6\%.
+
+\section{Benchmark 3: Explainable AI and Mathematical Boundaries}
+Objective: To ensure edge cases such as overqualified candidates do not exceed the maximum math constraints, ensuring the avoidance of logic errors and validating the human readability of the outputted text.
+
+Setup: For the candidate, they listed 6 Years of Experience (YoE), when the JD called only for 3. Moreover, they had 4 ``Extra Skills'' which were (aws, docker, kubernetes, redis).
+
+Methodology and Analysis:
+
+\begin{itemize}
+    \item \textbf{YoE Cap Calculation:} The experience score was calculated as \(\min(6/3, 1.0)\times 100 = 100\%\). Such a cap made sure that the candidate would not be assigned a misleading 200\% experience score that could negatively impact the final score calculation.
+    \item \textbf{Bonus Skills Cap Calculation:} The extra skills bonus score is 2.0\%, which stays within the limits of the hard bonus cap of 5.0\%.
+    \item \textbf{XAI Generated Text:} "Candidate A (Edge Case) is a medium-level match with a score of 60.0\%. This candidate fulfills all the requirements according to the experience parameter (6 years of experience / 3 years required). There are 2 skills out of 4 that are required (50\%): django, python. Missing skills are: postgresql, rest. Extra skills not mentioned in the job description: aws, docker, kubernetes, redis. Technical skills: 30.0\%; Soft skills: 10.0\%; Experience: 15.0\%; Context match: 3.0\%; Bonus for 4 extra skills: 2.0\%."
+    \item Transparency in our case means complete audibility of the model logic."
+\end{itemize}
+
+\section{Benchmark 4: Three-Way Architectural Comparison}
+Objectives: Measure the degree of the ``semantic gap'' by comparing the prototype (Approach A) with a Sentence-BERT based large language model (Approach C), and a hypothetical hybrid approach (Approach B).
+
+Setup: The sample resume used semantic phrasing such as ``RESTful'' instead of ``REST'', and ``Directed a team'' instead of ``Leadership''.
+
+Methodology and Analysis: \textbf{Approach A} refers to the developed prototype involving regex skill extraction, TF-IDF vectorization, and cosine similarity calculation. \textbf{Approach C} refers to an alternative implementation that relies solely on a Sentence-BERT/LLM semantic matching process. \textbf{Approach B} represents a hypothetical future approach that incorporates Sentence-BERT and LLM into a regex-hard skill boundary verification process.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark 4: Three-Way Architectural Comparison}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\RaggedRight\arraybackslash}p{0.15\textwidth} >{\RaggedRight\arraybackslash}X c c c c}
+\toprule
+\textbf{Approach} & \textbf{Architecture Style} & \textbf{Tech} & \textbf{Soft} & \textbf{Context} & \textbf{Final}\\
+\midrule
+Approach A & Current Prototype (Regex + TF-IDF) & 0.0\% & 0.0\% & 13.4\% & 17.5\%\\
+Approach C & Pure LLM (Sentence-BERT only) & N/A & N/A & 58.4\% & 58.4\%\\
+Approach B & Hybrid (Regex Tech + LLM Context) & 0.0\% & N/A & 58.4\% & 24.3\%\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table 6.3: Tech: the skill score of technical skills; Soft: the skill score of soft skills; Context: the semantic or lexicon-based context match score, and Final: overall candidate match score.
+
+As expected, Approach A does not succeed in bridging the lexical gap since it involves a regex layer which only searches for bounded skill strings. This means ``RESTful'' is not matched to ``REST'' and ``Directed a team'' is not matched to ``Leadership''. As such, technical and soft skill matches have failed. Consequently, the contextual match score through TF-IDF has been calculated at 13.4\%, resulting in the final candidate match score of 17.5\%. In essence, a light-weight lexicon-based architecture has proven fast and deterministic, although not flexible enough to match synonymous phrasing.
+
+On the other hand, Approach C is able to identify that ``RESTful'' is associated with ``REST'', and ``Directed a team'' is equivalent to ``leadership'' based on meaning, thus scoring 58.4\% context match score. However, it loses the rigid hard-boundary skill matches and explicit explainability aspect compared to Approach A. Meanwhile, Approach B appears to be promising in terms of future development since it is still deterministic yet flexible through its Sentence-BERT/LLM integration. With a 24.3\% match score, it proves that semantic match reward is possible without compromising hard-skill check.
+
+\section{Benchmark 5: Efficiency, Scalability, and Cost Optimization}
+Objective: Justify the logic behind choosing Approach A by benchmarking its performance against the processing of 100 resumes.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark 5: Efficiency, Scalability, and Cost Optimization}
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}Y Y Y}
+\toprule
+\textbf{Metric / Parameter} & \textbf{Approach A: Prototype (Regex + TF-IDF)} & \textbf{Approach C: Pure LLM (Sentence-BERT)} & \textbf{Approach B: Future Hybrid (Regex + LLM)}\\
+\midrule
+Processing Speed (Time) & 0.0062 seconds (Fastest) & 4.1860 seconds (Heavy) & 3.7217 seconds (Heaviest)\\
+Peak RAM Consumption & 0.12 MB (Lightest) & 7.33 MB & 1.35 MB\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Methodology and Analysis: The above benchmark sets the stage for validating the project hypothesis. Firstly, Approach A processes resumes at over 675 times the speed compared to any of the LLM architectures. The low memory utilization (only 0.12 MB) by the approach ensures that it can be executed on cheap cloud servers without memory errors. Though the LLM models have a semantic advantage over the proposed approach, the costs associated limit their applicability in SME screening massive resume batches.
+
+However, this does not in any way imply that the LLM models are inferior to the proposed approach. Instead, the case highlights the fact that selection of an appropriate model depends on the purpose of deployment. Where an in-depth semantic understanding of resumes is required, a combination of LLM architecture with the transformer (Approach C) would work perfectly well. In cases where there is a need for a rapid processing of several hundred resumes, then the Approach A becomes more appropriate.

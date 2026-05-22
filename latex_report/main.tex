@@ -1,0 +1,59 @@
+\documentclass[12pt,a4paper]{report}
+\input{preamble}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+\begin{document}
+\fontsize{13}{16}\selectfont
+
+% =========================================================
+% AI Resume Screening Final Report - LaTeX Skeleton
+% Compile with XeLaTeX or LuaLaTeX because this project uses fontspec.
+%
+% Paste content chapter-wise into the files inside:
+% - frontmatter/
+% - chapters/
+% - references/
+% =========================================================
+
+% -------- FRONT MATTER --------
+\pagenumbering{roman}
+
+\input{frontmatter/titlepage}
+\input{frontmatter/declaration}
+\input{frontmatter/certificate}
+\input{frontmatter/acknowledgement}
+\input{frontmatter/abstract}
+
+\tableofcontents
+\clearpage
+
+\listoftables
+\clearpage
+
+\listoffigures
+\clearpage
+
+\input{frontmatter/abbreviations}
+\clearpage
+
+% -------- MAIN CONTENT --------
+\pagenumbering{arabic}
+
+\input{chapters/chapter1_introduction}
+\input{chapters/chapter2_literature_review}
+\input{chapters/chapter3_objectives_gaps}
+\input{chapters/chapter4_system_architecture_design}
+\input{chapters/chapter5_implementation}
+\input{chapters/chapter6_experimental_setup_benchmarking}
+\input{chapters/chapter7_results_findings}
+\input{chapters/chapter8_limitations}
+\input{chapters/chapter9_conclusion_future_work}
+
+% -------- REFERENCES --------
+\clearpage
+\input{references/references}
+
+\end{document}

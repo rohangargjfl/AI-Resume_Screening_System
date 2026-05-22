@@ -1,0 +1,13 @@
+\chapter{LIMITATIONS}
+
+It is critical to recognize any inherent limitations within a system when designing it in engineering academic circles. Despite being impressively efficient and accurate, the prototype has many limitations that preclude its immediate implementation as a fully autonomous and zero-administrative solution.
+
+\section{The Lexical Semantic Gap}
+This problem can be clearly evidenced from Benchmark 4, where it shows that Regex is blind to implicit skills or synonyms of certain terms. For example, a person who wrote “engineered a multi-node containerized architecture” would not get any score for mentioning “Docker” or “Kubernetes” unless these terms are directly mapped in the ontology. Further, TF-IDF does not possess profound knowledge of the language; it calculates word significance in terms of frequency and location across documents but is unable to identify its usage. Hence, the two phrases like “I learned Python yesterday” and “I taught Python at university” result in almost indistinguishable mathematical vectors despite very different competence.
+
+\section{Ontology Maintenance and Rigidity}
+The skill database which serves as a basis for the SpaCy NLP engine has to be manually updated. With ever-accelerating progress in IT, new frameworks and languages keep emerging and require inclusion into the system’s dictionary array, representing an eternal maintenance task. Secondly, although OCR was proved to work resiliently well for digital PNG images, it relies solely on image quality for further analysis. Compressed JPEGs, paper folds, or poor lighting while taking photos with a mobile phone might greatly affect recognition accuracy using Tesseract.
+
+
+\section{Prototype and Data Constraints}
+The system was extensively tested on purpose-built benchmark datasets aimed at revealing weaknesses associated with such edge cases as keyword stuffing or verbose diluter. However, the prototype did not undergo stress testing against a real-world large-scale HR database, consisting of tens of thousands of resumes with highly irregular structure and multilingualism. Lastly, although OCR was used to alleviate layout bias, the same cannot be said about sociological demographic one; no algorithmically biased names or alma maters were audited and eliminated from the corpus.

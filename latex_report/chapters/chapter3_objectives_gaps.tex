@@ -1,0 +1,25 @@
+\chapter{OBJECTIVES AND ADDRESSED GAPS}
+
+\section{Primary Objective}
+The main goal of this B.Tech project is to develop a conceptual design and build a prototype for an AI-based Resume Analysis tool. The tool will be light, fast, and function as an initial screening tool with inherent explainability. The proposed system will address the challenges of rapidly, inexpensively and transparently analyzing candidate resumes and target job descriptions, and it will do so without employing large language models (LLMs) that are complex and demand deep semantic understanding.
+
+\section{Secondary Objectives}
+\begin{enumerate}
+    \item \textbf{Develop a Robust Parsing Pipeline:}Design a systematic data extraction engine that processes multiple document formats (.pdf, .docx, .txt) and smoothly incorporates a vision-based OCR fallback to obtain text from image-based / scanned resumes (.png, .jpg).
+    \item \textbf{Implement Hybrid Lexical Scoring:}Integrate the deterministic rule-based Natural Language Processing method, particularly SpaCy Named Entity Recognition (NER), with the statistical machine learning model, TF-IDF and Cosine Similarity, to develop an algorithm that computes a multi-dimensional, weighted match score.
+    \item \textbf{Establish an Explainable Output Engine:} Create an XAI module that translates the vector into human-understandable language by explaining why a particular candidate receives a particular rating.
+    \item \textbf{Conduct Architectural Benchmarking:} Evaluate the effectiveness of the designed prototype in a methodical way, contrasting its performance against pure semantic methods such as Sentence-BERT/LLM for the purpose of analyzing the efficiency differences in speed, memory utilization, and match results.
+\end{enumerate}
+
+\section{Addressed Research Gaps}
+The proposed solution effectively accounts for the shortcomings in the current state of research in a pragmatic way, rather than attempting to offer an omnipotent industry-grade approach to addressing all problems at hand.
+
+\textbf{The Keyword Mismatch Problem:} Existing applicant tracking systems (ATS) suffer from complete incapacity when faced with a requirement to match partial strings. By implementing the TF-IDF technique, the proposed solution takes into account the distributional frequency of the terms, therefore assigning partial credit for any relevant similarities in the text. At the same time, the solution admits a specific limitation: while the model is capable of matching terms, it cannot perform a more sophisticated task of deep phraseological mapping, e.g., matching “RESTful” with “REST,” as this will be possible only if Transformer models are used, resulting in slower processing speeds..
+
+\textbf{The Black-Box Match Score Problem:} Commercial solutions offer arbitrarily calculated context-free percentages. In order to address this issue, the proposed solution generates a data dictionary along with a dynamically created descriptive text that assigns separate parts of the total percentage to technical skills, soft skills, experience, and context.
+
+\textbf{Format Bias in Resume Parsing:} The visual complexity of CVs prevents most digital parsers from working properly and may negatively affect the score due to an unfavorable format chosen by the candidate. This problem is solved by using a multi-step extraction process that switches to Tesseract OCR and performs grayscale and binary conversions when the digital parser fails to recognize enough text.
+
+\textbf{Hardware and Cost Constraints for SMEs:} Resume processing using language models requires a lot of cloud GPU computations, which is expensive. The proposed prototype circumvents this issue as it uses only local CPUs and highly optimized machine learning models from scikit-learn, resulting in a speed of approximately 0.0062 seconds per resume.
+
+\textbf{Explainability Requirement for Recruiters:} Even though the advanced technique of explaining AI (SHAP), for example, provides strict mathematically-based interpretability, it often lacks clarity for humans, especially for the human resources department. The proposed prototype solves this problem by generating dynamic explanations in a natural language format, such as "Candidate meets 2 out of 4 required technical skills... Skills missing: postgresql."
