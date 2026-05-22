@@ -28,35 +28,42 @@ The implementation is cleanly separated into specialized Python modules to adher
 
 \begin{itemize}
     \item \textbf{app.py:} The main Flask application instance, handling HTTP REST requests, file uploads, and session management.
-    \item \textbf{parser.py:} Encapsulates the PyPDF2, docx, and Tesseract routing logic, managing the file reading logic.
+    
+    \item \textbf{parser.py:} Encapsulates the PyPDF2, docx, and Tesseract routing logic, managing the file reading operations.
+    
     \item \textbf{nlp\_engine.py:} Contains the SpaCy models, regex ontology dictionaries, and the core text normalization functions.
+    
     \item \textbf{matcher.py:} Houses the scikit-learn TF-IDF mathematical computations and the weighted scoring formula logic.
+    
     \item \textbf{xai.py:} Contains the Explainer class that translates the matcher.py output dictionaries into plain-English string representations.
+    
     \item \textbf{database.py:} Manages the SQLite database schema for secure recruiter authentication.
 \end{itemize}
 
 \section{Backend Routing and Concurrency}
-When an HR user navigates to the upload route, they submit a multipart form containing the target Job Description text and an array of binary file streams (resumes). The Flask route intercepts these files, saving them to a temporary \texttt{/uploads} directory. Crucially, a background processing thread is instantiated immediately. If 100 resumes are uploaded, processing them synchronously on the main thread would cause the HTTP request to timeout. The asynchronous thread iterates over each file, sequentially invoking:
+Upon clicking the upload button by the user of the HR portal, a multipart form gets sent by the user to the upload route, where the target Job Description and an array of resumes represented by file streams are sent. What follows is the creation of an asynchronous thread in the background to perform the required tasks. Were there 100 resumes in the batch, processing of all of them simultaneously on the primary thread would lead to time-out of the request. The asynchronous thread would execute:
 
 \begin{center}
 \texttt{parser.py} \(\rightarrow\) \texttt{nlp\_engine.py} \(\rightarrow\) \texttt{matcher.py} \(\rightarrow\) \texttt{xai.py}
 \end{center}
 
-Meanwhile, the frontend actively polls the backend status, and once complete, the final array of JSON objects is pushed to the results dashboard.
+At the same time, the frontend makes polling requests to the status of the backend, and upon completion, the finalized array of JSON objects is posted to the dashboard.
 
 \section{Database and Authentication}
-The project uses SQLite with SQLAlchemy to maintain lightweight local persistence. This supports recruiter user accounts, authentication, and session-level state without requiring an external database server. For a prototype environment, SQLite is appropriate because it is portable, self-contained, and easy to reset during testing. The authentication layer protects upload and result routes so that uploaded resumes and scoring outputs are available only to authorized users.
+SQLite and SQLAlchemy are utilized for lightweight local storage capabilities. These help support recruiter user profiles, authentication, and state per session without using an external database server. SQLite is well suited for a prototype since it can be easily erased for fresh runs, and it provides sufficient functionalities. In addition, authentication ensures access control over upload and results routes for confidentiality reasons.
 
 \section{Frontend Interface and Visualization}
-The frontend is built with Bootstrap to provide a clean, modern Software-as-a-Service (SaaS) aesthetic suitable for enterprise users.
+The frontend is designed with the Bootstrap framework to give a sleek Software-as-a-Service look for enterprise use.
 
 \begin{itemize}
-    \item \textbf{Upload Screen:} Features drag-and-drop file inputs and dynamic HTML5 sliders, allowing recruiters to manually adjust the weighting formula prior to execution to suit specific roles, for example weighing soft skills higher for a management position.
-    \item \textbf{Results Dashboard:} Displays candidates in a descending ranked table. A secondary view renders a Matplotlib/Chart.js radar chart visualizing the candidate's proficiency across the four core scoring dimensions: Technical Skills, Soft Skills, Experience, and Context.
-    \item \textbf{XAI Expansion Panel:} Clicking on a specific candidate expands an accordion containing the XAI generated text, revealing the exact missing skills, matched skills, and extra bonus skills found, providing immediate context.
+    \item \textbf{Upload Screen:} Contains features such as draggable HTML5 sliders, which give recruiters the ability to manually tune the weighting formula prior to computation depending on the type of job role being filled, for example assigning greater importance to soft skills than technical skills for managerial positions.
+    
+    \item \textbf{Result Screen:} Displays results in the form of a ranked list sorted from the highest-scoring candidates downward. An additional screen presents a Matplotlib/Chart.js radar graph representing the candidate's proficiency across the four scoring metrics: Technical Skills, Soft Skills, Experience, and Context.
+    
+    \item \textbf{XAI Expansion Panel:} Clicking on a candidate reveals an accordion displaying the exact text generated by the AI algorithm, detailing the missing skills, matched skills, and bonus skills identified.
 \end{itemize}
 
-Figure \ref{fig:scoring-config} shows the AI scoring configuration interface. This screen is important because it demonstrates that the recruiter can control the weighted scoring logic before analysis begins. The core score is distributed across technical skills, years of experience, TF-IDF context match, and soft skills, while the extra skills bonus cap is managed separately to prevent uncontrolled score inflation.
+The AI Scoring Configuration screen is shown in Figure \ref{fig:scoring-config}. It highlights how the recruiter has the ability to manipulate the scoring logic before any analysis is performed. The base score calculation includes technical skill level, years of experience, TF-IDF contextual matching score, and soft skills, while the extra skills bonus is calculated separately.
 
 \begin{figure}[H]
     \centering
@@ -67,7 +74,8 @@ Figure \ref{fig:scoring-config} shows the AI scoring configuration interface. Th
     \label{fig:scoring-config}
 \end{figure}
 
-Figure \ref{fig:xai-breakdown} shows the explainable AI output displayed on the results dashboard. The interface does not present the match score as a single opaque number; instead, it separates the score into technical skill contribution, soft skill contribution, experience contribution, context match contribution, and bonus contribution. The same panel also lists matched job-description skills, missing skills, bonus technical skills, and detected soft skills, making the ranking easier for recruiters to audit.
+Figure \ref{fig:xai-breakdown} This diagram depicts how the results dashboard displays explainable AI outputs. The interface does not use the match score as one opaque number but divides it into technical skill score, soft skill score, experience score, context score, and bonus score. Also, the panel displays the matched job description skills, missing skills, bonus technical skills, and detected soft skills to ease the auditing process for recruiters.
+
 
 \begin{figure}[H]
     \centering
@@ -79,4 +87,4 @@ Figure \ref{fig:xai-breakdown} shows the explainable AI output displayed on the 
 \end{figure}
 
 \section{Known Implementation Constraints}
-The current implementation utilizes SQLite, which is highly sufficient for a prototype but suffers from write-locking during high-concurrency enterprise batch operations. Furthermore, the skill ontology within \texttt{nlp\_engine.py} is currently hardcoded as a dictionary list. In a production environment, this would need to be linked to a dynamic, remotely updated graph database to keep pace with rapidly evolving industry terminology.
+At the moment, the system employs the SQLite database, which suffices well for the prototype. However, it encounters write locks whenever there is high concurrency in enterprise-level batch jobs. Moreover, the skill ontology implemented in \texttt{nlp\_engine.py} is hardcoded in form of a dictionary list. In a production environment, the skills ontology should be associated with a graph database that is remotely updated.
