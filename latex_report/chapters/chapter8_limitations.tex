@@ -1,0 +1,12 @@
+\chapter{LIMITATIONS}
+
+Honesty regarding system constraints is paramount in academic engineering. The prototype, while highly efficient and transparent, possesses several notable limitations that prevent it from being deployed as a standalone, zero-oversight production system.
+
+\section{The Lexical Semantic Gap}
+As extensively proven and quantified in Benchmark 4, Regex severely misses implicit skills and synonymic phrasing. A candidate who writes ``engineered a multi-node containerized architecture'' will not receive credit for ``Docker'' or ``Kubernetes'' unless those explicit strings are mapped in the ontology. Furthermore, TF-IDF lacks deep grammatical understanding; it counts words based on frequency and document distribution, but it cannot ascertain the context in which the word was used. For example, ``I learned Python yesterday'' and ``I taught Python at University'' yield nearly identical mathematical vectors, despite drastically different competency levels.
+
+\section{Ontology Maintenance and Rigidity}
+The underlying skill database, the ontology of hard and soft skills utilized by the SpaCy NLP engine, must be manually updated. As the technology industry rapidly evolves and new frameworks or languages emerge, a human administrator must manually enter these into the system's dictionary array, creating a long-term maintenance bottleneck. Additionally, while the OCR fallback pipeline proved highly resilient on digital PNG conversions, its accuracy depends entirely on scan quality. Heavily compressed JPEGs, physical paper crumples, or poor lighting in mobile-phone photographs will severely degrade Tesseract's character recognition accuracy, reintroducing a form of data-quality bias.
+
+\section{Prototype and Data Constraints}
+The system was carefully validated on a controlled, small-scale benchmark dataset designed specifically to trigger boundary edge cases, such as keyword stuffers and verbose diluters. The prototype has not been stress-tested against a live, large-scale, real-world HR database containing tens of thousands of highly irregular, multi-lingual resumes with overlapping jargon. Additionally, while layout bias was actively mitigated via OCR routing, deeper sociological demographic bias, such as algorithmic penalization of specific cultural names or alma maters, was not explicitly audited or scrubbed within this scope, representing an ongoing ethical challenge for future iterations.

@@ -1,0 +1,25 @@
+\chapter{OBJECTIVES AND ADDRESSED GAPS}
+
+\section{Primary Objective}
+The primary objective of this B.Tech project is to conceptualize, design, and implement an AI-driven Resume Analysis prototype that functions as a lightweight, explainable, and highly efficient first-pass screening tool. The system aims to intelligently match candidate resumes against target job descriptions while explicitly prioritizing processing speed, computational cost reduction, and human-readable transparency over the deep semantic complexity associated with heavy LLMs.
+
+\section{Secondary Objectives}
+\begin{enumerate}
+    \item \textbf{Develop a Robust Parsing Pipeline:} Create a sequential data extraction engine capable of handling varied document formats (.pdf, .docx, .txt) and seamlessly integrating a vision-based OCR fallback mechanism to extract readable text from image-based or scanned resumes (.png, .jpg).
+    \item \textbf{Implement Hybrid Lexical Scoring:} Combine deterministic rule-based Natural Language Processing, via SpaCy Named Entity Recognition, with statistical machine learning, TF-IDF and Cosine Similarity, to calculate a multi-dimensional, weighted match score.
+    \item \textbf{Establish an Explainable Output Engine:} Design an XAI module that translates the algorithmic vector output into human-readable text, detailing exactly why a candidate received a specific score to eliminate the black-box effect.
+    \item \textbf{Conduct Architectural Benchmarking:} Rigorously measure the performance of the developed prototype against purely semantic Sentence-BERT/LLM approaches to quantify the specific operational trade-offs in speed, memory footprint, and matching accuracy.
+\end{enumerate}
+
+\section{Addressed Research Gaps}
+The developed prototype strategically addresses the research gaps identified in the literature review, albeit practically rather than as a complete, infallible industry-grade solution.
+
+\textbf{The Keyword Mismatch Problem:} Standard ATS systems fail entirely when exact character strings are absent. By utilizing TF-IDF, the prototype maps the distributional frequency of terms, allowing partial credit for contextual similarities across the document. The prototype explicitly accepts a limitation here; it does not fully bridge deep semantic phrasing, such as mapping ``RESTful'' to ``REST'', as doing so requires Transformer models that would violate the sub-second millisecond processing speed constraints.
+
+\textbf{The Black-Box Match Score Problem:} Commercial AI systems yield arbitrary, context-free percentages. This prototype addresses the gap directly by returning a structured data dictionary and a dynamically generated natural language paragraph that breaks down the percentage into specific, trackable allocations: Technical Skills, Soft Skills, Experience, and Context.
+
+\textbf{Format Bias in Resume Parsing:} Complex layouts break standard digital parsers, unfairly penalizing candidates for aesthetic formatting choices. The prototype utilizes a sequential extraction pipeline that automatically fails over to Tesseract OCR with grayscale and binarization preprocessing if digital parsing yields insufficient characters, effectively standardizing complex visual layouts into reliable machine strings.
+
+\textbf{Hardware and Cost Constraints for SMEs:} Processing resumes through LLMs requires extensive, expensive cloud GPU access. The prototype addresses this constraint by operating entirely on local CPU hardware, utilizing highly optimized scikit-learn statistical models, achieving execution times of approximately 0.0062 seconds per resume.
+
+\textbf{Explainability Requirement for Recruiters:} Advanced XAI methods like SHAP provide deep mathematical transparency but lack human readability for HR staff. The prototype addresses this by generating dynamic natural language summaries, for example, ``Candidate matches 2/4 required technical skills... Missing: postgresql'', acting as an immediate, readable decision-support layer for recruiters without requiring data science expertise.

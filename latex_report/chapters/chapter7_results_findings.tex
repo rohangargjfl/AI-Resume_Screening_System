@@ -1,0 +1,17 @@
+\chapter{RESULTS AND FINDINGS}
+
+\section{Interpretation of Lexical vs. Semantic Trade-Offs}
+The aggregate results generated from the benchmarking phase present a clear, undeniable narrative of engineering trade-offs. The prototype (Approach A) successfully executes rapid, deterministic resume screening. However, Benchmark 4 explicitly visualizes the ``semantic gap.'' By relying on Regular Expressions and term-frequency statistics, the system demands that the candidate and the recruiter speak the exact same language. A discrepancy between ``REST'' and ``RESTful,'' or ``Postgres'' and ``PostgreSQL,'' will result in a zero-point allocation for that specific feature within the strict keyword bounds.
+
+Sentence-BERT and LLM architectures (Approach C) inherently understand that these terms map to the identical vector space. As shown in the literature by Deshmukh and Raut, deep embeddings resolve this linguistic friction seamlessly. However, the engineering decision to reject Approach C in the current prototype is heavily justified by the devastating operational findings in Benchmark 5.
+
+\section{Viability of the TF-IDF and Regex Approach}
+The true viability of the prototype lies strictly in its intended deployment context. In a real-world SaaS enterprise environment, where a single junior software developer job posting might receive 4,000 resumes overnight, processing those files through an LLM at 4.18 seconds per resume would take over 4.5 hours of continuous heavy-GPU compute time. Conversely, the developed prototype would accurately parse, score, and rank all 4,000 resumes in approximately 25 seconds on a standard, low-cost CPU.
+
+Thus, TF-IDF and Regex remain highly useful and commercially relevant, not as the final, infallible arbiter of hiring, but as a robust ``first-pass filter.'' By quickly discarding the bottom 80\% of applicants who demonstrably possess zero matching technical requirements, the HR department can then forward the highly-ranked top 20\% to more expensive semantic models or dedicated human reviewers, optimizing both time and financial resources.
+
+\section{Transparency and Auditability Insights}
+A crucial finding is the success of the rule-based Explainable AI module, as validated in Benchmark 3. While highly sophisticated XAI models like SHAP generate complex feature importance graphs and perturbation matrices, they often fundamentally confuse non-technical HR personnel, failing the basic definition of ``explanation'' for end-users. The prototype's methodology of intercepting the mathematical scoring dictionary and outputting a rigid, plain-English text paragraph ensures zero ambiguity. If a candidate explicitly asks why they were rejected, the HR manager can immediately point to the XAI output: ``You matched 50\% of the required skills, missing PostgreSQL.'' This protects the organization from legal bias liabilities while fostering internal human trust in the software layer.
+
+\section{Practical Recruitment Implications}
+The prototype proves that algorithmic fairness and speed need not be mutually exclusive. By standardizing the format via Tesseract OCR, the system mitigates visual format bias, ensuring that candidates from diverse socioeconomic backgrounds, who may lack access to premium resume-formatting services, are evaluated purely on the content of their text. The practical implication is a highly scalable, democratic screening layer that serves as an assistant to HR, rather than an autonomous replacement.

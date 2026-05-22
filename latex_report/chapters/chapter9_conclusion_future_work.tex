@@ -1,0 +1,17 @@
+\chapter{CONCLUSION AND FUTURE WORK}
+
+\section{Conclusion}
+The integration of Artificial Intelligence into the recruitment process is no longer a theoretical pursuit but an urgent industrial necessity driven by the sheer scale of modern talent pipelines. However, the blind application of massive, opaque deep-learning models introduces unacceptable financial costs and ethical liabilities for standard enterprises. This B.Tech Project-II successfully conceptualized, designed, and implemented a lightweight, highly explainable prototype for AI-powered resume screening.
+
+By strategically synthesizing layout-agnostic document parsing, deterministic Regex skill extraction, and statistical TF-IDF contextual scoring, the system validates a highly practical and commercially viable trade-off. It explicitly prioritizes blazing-fast execution speeds (0.0062 seconds per resume) and absolute textual transparency over perfect semantic understanding. The inclusion of mathematical bounding algorithms successfully neutralizes adversarial keyword stuffing, while the custom Explainable AI module bridges the trust gap between complex scoring vectors and human recruiters. Ultimately, this system is positioned not as an autonomous replacement for human judgment, but as a robust, cost-effective first-pass decision-support tool that respects the constraints of SME computing environments.
+
+\section{Future Work}
+Several concrete avenues for future enhancement exist to elevate the prototype into a fully production-ready enterprise application:
+
+\begin{itemize}
+    \item \textbf{Integration of a Hybrid Context Module:} Future iterations will aim to seamlessly blend Approach A and Approach B. By running the lightweight Regex shield first, the system could selectively invoke a smaller, fine-tuned Sentence-BERT model only when the lexical score falls into a borderline threshold, for example scoring between 45\% and 55\%, optimizing both total cost and semantic accuracy.
+    \item \textbf{Dynamic Skills Ontology via Knowledge Graphs:} Replacing the hardcoded dictionaries with a dynamically updating knowledge graph, for example pulling real-time data via API from LinkedIn or StackOverflow, would automate the maintenance of emerging technical skills.
+    \item \textbf{Fairness and Bias Auditing:} Integrating explicit debiasing algorithms to systematically scrub demographic indicators, including names, gender pronouns, locations, and university names, before vectorization occurs, ensuring absolute equity in the mathematical scoring pipeline.
+    \item \textbf{Model Monitoring Dashboards:} Implementing telemetry to monitor the distribution of generated scores over time, alerting administrators if the TF-IDF engine begins to favor specific, unintended keyword anomalies.
+    \item \textbf{Recruiter Feedback Loop:} Establishing a continuous human-in-the-loop learning mechanism where HR professionals can manually flag ``false positives'' or ``false negatives'' on the dashboard, allowing the system to adjust its internal weighting vectors dynamically over time based on actual hiring outcomes.
+\end{itemize}
