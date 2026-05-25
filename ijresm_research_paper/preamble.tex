@@ -1,0 +1,77 @@
+\usepackage[a4paper,top=0.70in,bottom=0.70in,left=0.65in,right=0.65in]{geometry}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage{xurl}
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{newtxtext,newtxmath}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{balance}
+\usepackage{microtype}
+\usepackage[table]{xcolor}
+\usepackage[section]{placeins}
+
+\graphicspath{{../latex_report/figures/}}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt,parsep=0pt}
+\setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=1pt,parsep=0pt}
+\renewcommand{\arraystretch}{1.12}
+\newcounter{algorithm}
+\setlength{\columnsep}{0.20in}
+\setlength{\parindent}{0.14in}
+\setlength{\parskip}{0pt}
+\setlength{\textfloatsep}{7pt plus 1pt minus 2pt}
+\setlength{\floatsep}{6pt plus 1pt minus 2pt}
+\setlength{\intextsep}{6pt plus 1pt minus 2pt}
+\raggedbottom
+
+\pagestyle{empty}
+
+\titleformat{\section}{\centering\normalsize\bfseries}{\Roman{section}.}{0.5em}{\MakeUppercase}
+\titleformat{\subsection}{\normalsize\itshape}{\Alph{subsection}.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\arabic{subsubsection})}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{2pt}
+\titlespacing*{\subsubsection}{0pt}{4pt}{1pt}
+
+\renewcommand{\thetable}{\Roman{table}}
+\renewcommand{\tablename}{TABLE}
+\DeclareCaptionLabelFormat{ijresmfig}{Fig. #2}
+\captionsetup[table]{font=footnotesize,labelfont=sc,textfont=it,justification=centering,labelsep=colon,skip=3pt}
+\captionsetup[figure]{font=footnotesize,labelfont=bf,justification=centering,labelformat=ijresmfig,labelsep=period,skip=3pt}
+\arrayrulecolor{black}
+
+\newenvironment{ijresmabstract}
+{\par\noindent\fontsize{9}{11}\selectfont\textbf{\textit{Abstract---}}\ \bfseries}
+{\par\vspace{4pt}}
+
+\newcommand{\ijresmkeywords}[1]{\par\noindent\fontsize{9}{11}\selectfont\textbf{\textit{Keywords---}} {\bfseries #1}\par\vspace{8pt}}
+\newcommand{\authorname}[1]{{\fontsize{11}{13}\selectfont #1}}
+\newcommand{\affiliationline}[1]{{\fontsize{8}{9}\itshape\selectfont #1}}
+\newcommand{\plainauthorline}[1]{{\fontsize{8}{9}\selectfont #1}}
+\newcommand{\guideblock}{%
+\begin{tabular}{@{}c@{}}
+\authorname{Mrs. Gull Kaur*}\\
+\affiliationline{Assistant Professor}\\
+\affiliationline{Dept. of Computer Science \& Engg.}\\
+\affiliationline{Delhi Technological University}\\
+\affiliationline{New Delhi, India}
+\end{tabular}
+}
+\newcommand{\studentblock}[2]{%
+\begin{tabular}{@{}c@{}}
+\authorname{#1}\\
+\plainauthorline{#2}\\
+\affiliationline{Dept. of Computer Science \&}\\
+\affiliationline{Engg.}\\
+\affiliationline{Delhi Technological University}\\
+\affiliationline{New Delhi, India}
+\end{tabular}
+}
+

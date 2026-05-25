@@ -1,0 +1,56 @@
+\section{Implementation}
+The prototype was implemented as a modular Python web application. Flask provides the backend server and routing. The document parsing layer uses native file readers and OCR fallback. The NLP layer uses SpaCy tokenization, lemmatization, named-entity extraction, regular expressions, and curated skill dictionaries. The matching layer uses scikit-learn TF-IDF vectorization and cosine similarity. The dashboard is built using HTML, CSS, Bootstrap, Jinja2 templates, JavaScript, Matplotlib, and Chart.js.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\columnwidth}{|p{0.28\columnwidth}|Y|}
+\hline
+\rowcolor{gray!25}
+\textbf{Component} & \textbf{Technology and Purpose}\\
+\hline
+Backend & Python and Flask for routing, upload handling, and session flow.\\
+\hline
+NLP & SpaCy tokenization, lemmatization, NER, regular expressions, and skill dictionaries for extraction.\\
+\hline
+Similarity & TF-IDF and cosine similarity for contextual matching.\\
+\hline
+Parsing & PyPDF2, python-docx, text reading, image parsing, dots.mocr/Tesseract OCR fallback, and PDF-to-image conversion for scanned documents.\\
+\hline
+Storage & SQLite, SQLAlchemy, Flask-Login, password hashing, and optional Google OAuth SSO for lightweight user/session persistence.\\
+\hline
+Frontend & Bootstrap, Jinja2, JavaScript, Matplotlib Base64 charts, and Chart.js for dashboards.\\
+\hline
+\end{tabularx}
+\caption{Implementation Stack}
+\label{tab:stack}
+\end{table}
+
+\subsection{Backend Flow}
+When a recruiter uploads resumes and a job description, the backend stores uploaded content and weight settings server-side under a UUID key. Each resume is processed through the parser, NLP extractor, matching engine, and explanation layer. Results are returned as structured objects containing candidate name, score components, matched skills, missing skills, bonus skills, detected soft skills, and generated explanation text. The separation of concerns keeps the parser, matcher, and explainer independently testable.
+
+\subsection{Concurrency and User Experience}
+Batch screening can create long-running requests if all files are processed synchronously. The prototype therefore starts a daemon background thread and lets the analysis page poll a status endpoint while processing continues. The recruiter configures weights, uploads documents, waits for completion, and then reviews ranked results with score explanations. This supports quick triage while preserving transparency.
+
+\subsection{Recruiter-Controlled Weighting}
+The frontend provides controls for tuning the scoring weights before the run. Four primary sliders share a normalized 100\% pool for technical skills, soft skills, experience, and context. A fifth bonus slider is isolated because the bonus is an additive capped offset. This allows technical roles to prioritize hard skills while management-oriented roles can assign more weight to soft skills and experience. Fig.~\ref{fig:config} shows the scoring configuration interface.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{ai_scoring_configuration.png}
+    \caption{Recruiter-facing scoring configuration with adjustable weights.}
+    \label{fig:config}
+\end{figure}
+
+\subsection{Explainable Output}
+The result dashboard does not expose only a single final score. It decomposes the score into technical skills, soft skills, experience, context match, and bonus contribution. The expanded explanation panel lists matched and missing job-description skills, which makes the score traceable. Fig.~\ref{fig:xai} shows the explainable score breakdown interface.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{ai_score_breakdown.png}
+    \caption{Explainable AI score breakdown for recruiter auditability.}
+    \label{fig:xai}
+\end{figure}
+
+\subsection{Illustrative Processing Case}
+For a job description requiring Python, Django, PostgreSQL, and REST with three years of experience, a candidate who lists Python, Django, six years of experience, and extra skills such as AWS, Docker, Kubernetes, and Redis receives a technical score of \(2/4=50\%\). The experience score is capped at \(100\%\), and the extra-skill bonus contributes 2.0\% under the configured cap. The final explanation states that the candidate satisfies experience, matches Python and Django, misses PostgreSQL and REST, and has additional adjacent skills. This demonstrates the raw-text to structured-evidence to score-and-explanation flow.

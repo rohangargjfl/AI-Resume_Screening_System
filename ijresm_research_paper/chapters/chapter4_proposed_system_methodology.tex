@@ -1,0 +1,52 @@
+\section{Proposed System and Methodology}
+The proposed architecture is organized into five modules: document parsing, NLP extraction, weighted matching, explainable AI, and visualization. Fig.~\ref{fig:architecture} presents the overall flow from uploaded resumes and job description to ranked output.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\columnwidth]{project_flowchart.png}
+    \caption{End-to-end architecture of the proposed AI-powered resume screening system.}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{Document Parsing Layer}
+The parsing layer receives resumes in text, PDF, Word, or image formats. Native text is read directly. Digital PDF files are processed through PDF text extraction. Word files are parsed through the document XML structure. If extracted text is below a minimum threshold, the document is treated as scanned or parser-resistant and routed to OCR. Image resumes are directly routed to the OCR path.
+
+\subsection{OCR Fallback Layer}
+The OCR fallback layer applies image preprocessing before character recognition. In the implemented parser, image-based resumes and scanned PDFs are first routed through the available dots.mocr provider. If that provider fails or is disabled, the system falls back to the Tesseract command-line engine. Before Tesseract execution, transparent images are flattened onto a white background, converted to grayscale, contrast-enhanced, sharpened, and binarized using a fixed intensity threshold. For scanned PDFs, pages are converted to 300 DPI images before OCR. This fallback is intended to prevent candidates from being penalized simply because their resumes are scanned or image-based.
+
+\subsection{NLP Extraction Layer}
+The normalized text is lowercased and processed by a lightweight NLP module. SpaCy's \texttt{en\_core\_web\_sm} model is used for tokenization, lemmatization, stop-word filtering, and named-entity extraction. Technical and soft skills are not extracted through generic NER; they are matched using strict regular-expression word boundaries against curated skill lists. This is done to avoid false positives such as matching a single-letter technical skill inside an unrelated word. The technical list includes terms such as Python, Django, REST, Docker, AWS, PostgreSQL, and related technologies, while the soft-skill list includes terms such as leadership, communication, collaboration, and cross-functional work. Regular expressions identify direct and indirect years-of-experience evidence such as ``5 years of experience'', ``experience: 5 years'', and date ranges.
+
+\subsection{Matching and Ranking Layer}
+The matching layer computes four principal components: technical skill score, soft skill score, years-of-experience score, and contextual similarity. Technical and soft scores are based on coverage of required skills. Experience is capped so that over-qualified candidates do not receive more than the maximum allotted experience weight. Contextual similarity is calculated using TF-IDF vectors and cosine similarity.
+
+\subsection{Explainable AI Layer}
+The explanation layer receives the internal score dictionary and converts it into plain-language justification. Rather than post-hoc approximating a black-box model, it directly reports the exact symbolic components used in scoring. This produces statements listing matched required skills, missing skills, detected extra skills, experience fit, and score contribution by component.
+
+\subsection{Module Responsibilities}
+Table~\ref{tab:modules} summarizes the responsibility of each module. This decomposition is important because recruitment screening combines document engineering, NLP, mathematical scoring, and user-interface concerns. Keeping these functions separate improves maintainability and allows individual modules to be replaced later.
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{|p{0.22\columnwidth}|p{0.28\columnwidth}|p{0.36\columnwidth}|}
+\hline
+\rowcolor{gray!25}
+\textbf{Module} & \textbf{Input / Output} & \textbf{Responsibility}\\
+\hline
+Document parser & File stream $\rightarrow$ raw text & Reads digital documents, detects low-quality extraction, routes scanned resumes to OCR.\\
+\hline
+OCR fallback & Image $\rightarrow$ recovered text & Applies preprocessing and OCR to reduce format bias for non-searchable resumes.\\
+\hline
+NLP extractor & Normalized text $\rightarrow$ attributes & SpaCy pipeline; detects skills and experience via curated dictionaries and regex.\\
+\hline
+Matching engine & Attributes $\rightarrow$ score dict & Computes tech, soft, experience, TF-IDF context, bonus, and final scores.\\
+\hline
+XAI generator & Score dict $\rightarrow$ explanation & Produces plain-English explanations with matched, missing, and extra skills.\\
+\hline
+Dashboard & Ranked JSON $\rightarrow$ UI & Displays weights, ranked candidates, breakdowns, and explanation panels.\\
+\hline
+\end{tabular}
+\caption{Functional Responsibilities of the Proposed Framework}
+\label{tab:modules}
+\end{table}

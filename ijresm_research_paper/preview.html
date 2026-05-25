@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>main</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="introduction">Introduction</h1>
+<p>Digital recruitment has significantly increased the number of applications received for a single job posting. Online job portals allow applicants to apply across locations with very low effort, and organizations often receive hundreds or thousands of resumes for a single opening. Human recruiters therefore spend substantial time performing repetitive first-stage screening. This stage is also vulnerable to inconsistency because reviewers may give excessive weight to formatting, university names, familiar employers, or visually prominent sections rather than the actual match between candidate capabilities and role requirements <span class="citation" data-cites="b3"></span>, <span class="citation" data-cites="b10"></span>.</p>
+<p>Applicant Tracking Systems (ATS) were introduced to reduce this workload, but many traditional systems operate primarily through rigid keyword matching. A job description requiring “Python”, “REST”, and “PostgreSQL” may cause the system to search for these exact terms in candidate resumes. This approach is computationally inexpensive, but it creates false negatives when a candidate uses alternate wording, abbreviations, or semantically related phrasing. It is also vulnerable to keyword stuffing, where candidates insert repeated job-description terms into resumes in order to inflate match scores.</p>
+<p>Recent recruitment systems increasingly use transformer-based semantic embeddings and large language models. These methods can map related expressions such as “RESTful APIs” and “REST” into nearby semantic spaces, reducing lexical brittleness <span class="citation" data-cites="b6"></span>, <span class="citation" data-cites="b12"></span>. However, they introduce two practical challenges. First, they increase latency, memory consumption, and deployment cost, particularly when processing large batches. Second, they often behave as black-box scoring layers. A recruiter may receive a high or low match score without a clear, auditable explanation of which job requirements were satisfied, missing, or over-weighted. In hiring contexts, such opacity is not merely inconvenient; it can reduce trust and make candidate rejection decisions difficult to justify <span class="citation" data-cites="b8"></span>, <span class="citation" data-cites="b14"></span>.</p>
+<p>This paper presents a practical middle-ground architecture for first-pass resume screening. The proposed framework combines deterministic skill extraction, TF-IDF cosine similarity, bounded weighted scoring, optical character recognition fallback, and rule-based explainability. Rather than claiming complete semantic understanding, it is designed around three constraints common in small and medium-sized enterprise recruitment: speed, low deployment cost, and auditability. Each score is converted into a plain-language explanation that lists matched skills, missing skills, detected soft skills, experience fit, and bonus skills.</p>
+<p>The main contributions of this work are:</p>
+<ul>
+<li><p>an end-to-end OCR-aware resume screening pipeline that handles text, PDF, and image resumes using digital extraction followed by OCR fallback;</p></li>
+<li><p>a bounded weighted scoring model that combines technical skills, soft skills, experience, contextual similarity, and capped extra-skill bonuses;</p></li>
+<li><p>an explainable AI layer that converts score components into recruiter-readable justifications;</p></li>
+<li><p>a benchmark-driven comparison of the lightweight Regex+TF-IDF design against semantic embedding alternatives with respect to robustness, efficiency, and interpretability.</p></li>
+</ul>
+<h1 id="background-and-related-work">Background and Related Work</h1>
+<h2 id="keyword-based-resume-screening">Keyword-Based Resume Screening</h2>
+<p>Early ATS solutions used Boolean search and keyword frequency counts to match resumes against job descriptions. Such systems are simple to implement and can process large document batches quickly <span class="citation" data-cites="b1"></span>, <span class="citation" data-cites="b3"></span>. Their weakness is that they treat language as exact strings. A candidate who writes “backend service development” may be relevant to a backend engineering role, but a strict keyword system may not reward that expression unless it contains the exact expected keywords. Rigid matching also encourages applicant behavior that optimizes for the parser rather than for truthful skill representation.</p>
+<h2 id="classical-nlp-and-vector-space-models">Classical NLP and Vector-Space Models</h2>
+<p>Classical machine learning methods provide a middle layer between exact keyword search and deep semantic modeling. TF-IDF assigns greater importance to terms that are frequent in a document but not common across the corpus. When used with cosine similarity, it provides a fast numerical estimate of textual relevance <span class="citation" data-cites="b7"></span>, <span class="citation" data-cites="b10"></span>. In resume screening, TF-IDF is useful because it reduces the influence of generic terms and can penalize verbose, unrelated content. Rule-guided NLP can complement TF-IDF by extracting structured attributes such as skills and years of experience <span class="citation" data-cites="b16"></span>.</p>
+<h2 id="transformer-based-semantic-matching">Transformer-Based Semantic Matching</h2>
+<p>Transformer-based models such as BERT and Sentence-BERT improve semantic matching by embedding sentences into vector spaces where related meanings can be compared <span class="citation" data-cites="b6"></span>, <span class="citation" data-cites="b12"></span>. Recent recruitment systems use such embeddings, LLM feedback loops, and multi-agent frameworks to match candidate profiles and job descriptions more flexibly <span class="citation" data-cites="b2"></span>, <span class="citation" data-cites="b5"></span>, <span class="citation" data-cites="b11"></span>, <span class="citation" data-cites="b13"></span>. These models are valuable when candidates and recruiters use different vocabulary for the same competence. However, they demand more memory and computation than lexical approaches, and they may not naturally produce explanations that are easy for non-technical HR users to audit.</p>
+<h2 id="explainable-ai-in-recruitment">Explainable AI in Recruitment</h2>
+<p>Explainable AI is especially important in hiring because ranking decisions can affect career opportunities <span class="citation" data-cites="b8"></span>, <span class="citation" data-cites="b14"></span>. General-purpose methods such as SHAP and LIME can help analyze complex models, but their outputs may be too technical for everyday recruitment workflows <span class="citation" data-cites="b9"></span>. A recruiter usually needs concrete statements such as “matched two out of four required skills” or “missing PostgreSQL and REST”, not only feature-attribution plots. The present system therefore uses a rule-based explanation layer aligned with the internal score dictionary.</p>
+<h2 id="format-bias-and-ocr-based-parsing">Format Bias and OCR-Based Parsing</h2>
+<p>Resume screening systems can unintentionally penalize candidates because of file format rather than content. A parser may fail on scanned PDFs, image resumes, or visually designed resumes with non-linear layouts <span class="citation" data-cites="b7"></span>, <span class="citation" data-cites="b15"></span>. OCR fallback reduces such format bias by recovering text when native extraction fails. Although OCR can introduce character-level noise, image preprocessing such as grayscale conversion, binarization, and sharpening can improve extraction quality for standard resume images.</p>
+<h1 id="problem-formulation">Problem Formulation</h1>
+<p>Let <span class="math inline"><em>R</em> = {<em>r</em><sub>1</sub>, <em>r</em><sub>2</sub>, …, <em>r</em><sub><em>n</em></sub>}</span> be a batch of resumes submitted for a job description <span class="math inline"><em>J</em></span>. The objective is to produce a ranked list <span class="math inline"><em>L</em></span> where each candidate receives a bounded match score <span class="math inline"><em>S</em><sub><em>i</em></sub> ∈ [0, 100]</span> and an explanation <span class="math inline"><em>E</em><sub><em>i</em></sub></span>. The screening task is formulated as an auditable first-pass filtering problem, not as a fully autonomous hiring decision: <span class="math display"><em>f</em>(<em>r</em><sub><em>i</em></sub>, <em>J</em>, <em>W</em>) → (<em>S</em><sub><em>i</em></sub>, <em>E</em><sub><em>i</em></sub>),</span> where <span class="math inline"><em>W</em></span> denotes recruiter-configurable scoring weights. Each processed resume is represented as a structured record containing extracted text, detected technical skills, soft skills, inferred years of experience, contextual similarity, component scores, final score, and explanation. The job description is processed in the same way, but its extracted fields act as requirements. The design targets four requirements: format tolerance, bounded scoring, low computational cost, and human-readable interpretability. The framework deliberately avoids demographic inference and restricts ranking features to text-derived role relevance.</p>
+<h1 id="proposed-system-and-methodology">Proposed System and Methodology</h1>
+<p>The proposed architecture is organized into five modules: document parsing, NLP extraction, weighted matching, explainable AI, and visualization. Fig. <a href="#fig:architecture" data-reference-type="ref" data-reference="fig:architecture">[fig:architecture]</a> presents the overall flow from uploaded resumes and job description to ranked output.</p>
+<div class="strip">
+<p><img src="project_flowchart.png" style="width:86.0%" alt="image" /> <span id="fig:architecture" label="fig:architecture">[fig:architecture]</span></p>
+</div>
+<h2 id="document-parsing-layer">Document Parsing Layer</h2>
+<p>The parsing layer receives resumes in text, PDF, Word, or image formats. Native text is read directly. Digital PDF files are processed through PDF text extraction. Word files are parsed through the document XML structure. If extracted text is below a minimum threshold, the document is treated as scanned or parser-resistant and routed to OCR. Image resumes are directly routed to the OCR path.</p>
+<h2 id="ocr-fallback-layer">OCR Fallback Layer</h2>
+<p>The OCR fallback layer applies image preprocessing before character recognition. In the implemented parser, image-based resumes and scanned PDFs are first routed through the available dots.mocr provider. If that provider fails or is disabled, the system falls back to the Tesseract command-line engine. Before Tesseract execution, transparent images are flattened onto a white background, converted to grayscale, contrast-enhanced, sharpened, and binarized using a fixed intensity threshold. For scanned PDFs, pages are converted to 300 DPI images before OCR. This fallback is intended to prevent candidates from being penalized simply because their resumes are scanned or image-based.</p>
+<h2 id="nlp-extraction-layer">NLP Extraction Layer</h2>
+<p>The normalized text is lowercased and processed by a lightweight NLP module. SpaCy’s <code>en_core_web_sm</code> model is used for tokenization, lemmatization, stop-word filtering, and named-entity extraction. Technical and soft skills are not extracted through generic NER; they are matched using strict regular-expression word boundaries against curated skill lists. This is done to avoid false positives such as matching a single-letter technical skill inside an unrelated word. The technical list includes terms such as Python, Django, REST, Docker, AWS, PostgreSQL, and related technologies, while the soft-skill list includes terms such as leadership, communication, collaboration, and cross-functional work. Regular expressions identify direct and indirect years-of-experience evidence such as “5 years of experience”, “experience: 5 years”, and date ranges.</p>
+<h2 id="matching-and-ranking-layer">Matching and Ranking Layer</h2>
+<p>The matching layer computes four principal components: technical skill score, soft skill score, years-of-experience score, and contextual similarity. Technical and soft scores are based on coverage of required skills. Experience is capped so that over-qualified candidates do not receive more than the maximum allotted experience weight. Contextual similarity is calculated using TF-IDF vectors and cosine similarity.</p>
+<h2 id="explainable-ai-layer">Explainable AI Layer</h2>
+<p>The explanation layer receives the internal score dictionary and converts it into plain-language justification. Rather than post-hoc approximating a black-box model, it directly reports the exact symbolic components used in scoring. This produces statements listing matched required skills, missing skills, detected extra skills, experience fit, and score contribution by component.</p>
+<h2 id="module-responsibilities">Module Responsibilities</h2>
+<p>Table <a href="#tab:modules" data-reference-type="ref" data-reference="tab:modules">[tab:modules]</a> summarizes the responsibility of each module. This decomposition is important because recruitment screening combines document engineering, NLP, mathematical scoring, and user-interface concerns. Keeping these functions separate improves maintainability and allows individual modules to be replaced later.</p>
+<div class="strip">
+<div class="tabularx">
+<p><span>|p<span>0.18</span>|p<span>0.25</span>|Y|</span> <strong>Module</strong> &amp; <strong>Input and Output</strong> &amp; <strong>Responsibility</strong><br />
+Document parser &amp; File stream <span class="math inline">→</span> raw text &amp; Reads digital documents, detects low-quality extraction, and routes scanned or image-based resumes to OCR fallback.<br />
+OCR fallback &amp; Image representation <span class="math inline">→</span> recovered text &amp; Applies preprocessing and optical character recognition to reduce format bias for non-searchable resumes.<br />
+NLP extractor &amp; Normalized text <span class="math inline">→</span> structured attributes &amp; Uses SpaCy for linguistic preprocessing and NER, while detecting technical skills, soft skills, and years of experience through curated dictionaries and regular expressions.<br />
+Matching engine &amp; Resume attributes and JD attributes <span class="math inline">→</span> score dictionary &amp; Computes technical coverage, soft-skill coverage, experience score, TF-IDF context score, bonus score, and final score.<br />
+XAI generator &amp; Score dictionary <span class="math inline">→</span> explanation &amp; Produces recruiter-readable explanations containing matched, missing, and extra skills along with score components.<br />
+Dashboard &amp; Ranked JSON records <span class="math inline">→</span> visual interface &amp; Displays configurable weights, ranked candidates, score breakdowns, and explanation panels.<br />
+</p>
+</div>
+<p><span id="tab:modules" label="tab:modules">[tab:modules]</span></p>
+</div>
+<h1 id="scoring-model-and-algorithm">Scoring Model and Algorithm</h1>
+<h2 id="end-to-end-screening-algorithm">End-to-End Screening Algorithm</h2>
+<p>The complete workflow is shown in Algorithm <a href="#alg:endtoend" data-reference-type="ref" data-reference="alg:endtoend">[alg:endtoend]</a>. This algorithm is included explicitly because the project is best understood as a step-wise transformation from raw input files to ranked recruiter-facing output.</p>
+<div class="strip">
+<hr />
+<p><span id="alg:endtoend" label="alg:endtoend">[alg:endtoend]</span> <strong>Algorithm : OCR-Aware Explainable Resume Screening Pipeline</strong></p>
+<hr />
+<ol>
+<li><p><strong>Input:</strong> Resume batch <span class="math inline"><em>R</em></span>, job description <span class="math inline"><em>J</em></span>, scoring weights <span class="math inline"><em>W</em> = (<em>W</em><sub><em>t</em></sub>, <em>W</em><sub><em>s</em></sub>, <em>W</em><sub><em>e</em></sub>, <em>W</em><sub><em>c</em></sub>)</span>, bonus cap <span class="math inline"><em>B</em><sub><em>m</em><em>a</em><em>x</em></sub></span>.</p></li>
+<li><p>Parse <span class="math inline"><em>J</em></span> and extract required technical skills, soft skills, and required experience.</p></li>
+<li><p>For each resume <span class="math inline"><em>r</em><sub><em>i</em></sub> ∈ <em>R</em></span>:</p>
+<ol>
+<li><p>Detect file type of <span class="math inline"><em>r</em><sub><em>i</em></sub></span>.</p></li>
+<li><p>If the file is native text or a digital document, perform digital text extraction.</p></li>
+<li><p>If extracted text length is below threshold <span class="math inline"><em>τ</em></span>, convert the file to image representation and invoke OCR fallback.</p></li>
+<li><p>If the file is an image, apply OCR using the available OCR provider; if Tesseract fallback is required, flatten transparency, convert to grayscale, boost contrast, sharpen, binarize, and run OCR.</p></li>
+<li><p>Normalize extracted text by lowercasing, removing noisy tokens, and standardizing spacing.</p></li>
+<li><p>Extract candidate technical skills, soft skills, and years of experience using skill ontology and regular expressions.</p></li>
+<li><p>Compute technical coverage, soft-skill coverage, capped experience match, and TF-IDF cosine similarity.</p></li>
+<li><p>Compute capped extra-skill bonus from skills present in resume but absent in the job description.</p></li>
+<li><p>Calculate final weighted score <span class="math inline"><em>S</em><sub><em>i</em></sub></span>.</p></li>
+<li><p>Generate explanation <span class="math inline"><em>E</em><sub><em>i</em></sub></span> from matched, missing, bonus, and score-breakdown fields.</p></li>
+</ol></li>
+<li><p>Sort all candidate outputs by <span class="math inline"><em>S</em><sub><em>i</em></sub></span> in descending order.</p></li>
+<li><p><strong>Output:</strong> Ranked candidate list <span class="math inline"><em>L</em> = {(<em>r</em><sub><em>i</em></sub>, <em>S</em><sub><em>i</em></sub>, <em>E</em><sub><em>i</em></sub>)}</span> and dashboard visualizations.</p></li>
+</ol>
+<hr />
+</div>
+<h2 id="parsing-and-text-preparation">Parsing and Text Preparation</h2>
+<p>The parser uses a threshold <span class="math inline"><em>τ</em> = 50</span> characters to decide whether native PDF extraction is sufficient. If a PDF returns fewer than <span class="math inline"><em>τ</em></span> characters, the document is treated as scanned or parser-resistant and routed to OCR fallback. The parser also checks the PDF magic-byte header so that images renamed with a <code>.pdf</code> extension can be routed to image OCR. After extraction, text is lowercased and whitespace-normalized, while punctuation is intentionally preserved to protect technical tokens such as <code>C++</code>, <code>Node.js</code>, and experience ranges such as <code>1-3</code>.</p>
+<h2 id="skill-and-experience-extraction">Skill and Experience Extraction</h2>
+<p>Let <span class="math inline"><em>T</em><sub><em>J</em></sub></span> denote the set of technical skills required by the job description and <span class="math inline"><em>T</em><sub><em>R</em></sub></span> denote the set extracted from a resume. The technical skill score is: <span class="math display">$$S_{tech}=\frac{|T_J \cap T_R|}{|T_J|}\times 100.$$</span> Similarly, if <span class="math inline"><em>P</em><sub><em>J</em></sub></span> is the set of requested soft skills and <span class="math inline"><em>P</em><sub><em>R</em></sub></span> is the set found in the resume, then: <span class="math display">$$S_{soft}=\frac{|P_J \cap P_R|}{|P_J|}\times 100.$$</span> When a job description does not explicitly request soft skills, the soft component can be neutralized or assigned according to recruiter settings.</p>
+<p>Skill extraction is performed using boundary-aware matching. A direct substring search can create false positives; for example, matching “R” inside “manager” would be incorrect. The extractor therefore treats skills as tokens or multi-word expressions with boundary conditions. Soft skills are also matched explicitly, which keeps the method transparent but limits semantic recall for indirectly stated traits.</p>
+<p>Experience is treated as a bounded requirement. If <span class="math inline"><em>Y</em><sub><em>R</em></sub></span> is detected candidate experience and <span class="math inline"><em>Y</em><sub><em>J</em></sub></span> is required experience, the experience score is: <span class="math display">$$S_{exp}=\min\left(\frac{Y_R}{Y_J},1.0\right)\times 100.$$</span> The cap prevents a candidate with double the required experience from receiving a mathematically inflated 200% experience score.</p>
+<h2 id="contextual-similarity">Contextual Similarity</h2>
+<p>The system uses TF-IDF vectorization to represent the resume and job description as vectors. The primary implementation uses scikit-learn’s <code>TfidfVectorizer</code> with English stop-word removal, a maximum vocabulary size of 5000, and unigram-plus-bigram features <span class="math inline">(1, 2)</span>. The bi-gram setting captures short technical phrases such as “machine learning” without loading a neural embedding model. Let <span class="math inline"><em>A</em></span> be the resume vector and <span class="math inline"><em>B</em></span> be the job-description vector. Their contextual similarity is computed by cosine similarity: <span class="math display">$$S_{ctx}=\frac{A \cdot B}{\|A\|\|B\|}\times 100.$$</span> TF-IDF rewards distinctive terms more strongly than generic words. In combination with cosine normalization, it reduces the benefit of simply making a resume longer or repeatedly inserting a subset of terms, which is useful for resisting simple keyword-stuffing attacks.</p>
+<h2 id="bounded-weighted-score">Bounded Weighted Score</h2>
+<p>Recruiters may tune component weights before analysis. The default configuration used in the prototype is: <span class="math display"><em>W</em><sub><em>t</em><em>e</em><em>c</em><em>h</em></sub> = 0.60,  <em>W</em><sub><em>s</em><em>o</em><em>f</em><em>t</em></sub> = 0.10,  <em>W</em><sub><em>e</em><em>x</em><em>p</em></sub> = 0.15,  <em>W</em><sub><em>c</em><em>t</em><em>x</em></sub> = 0.15,</span> where: <span class="math display"><em>W</em><sub><em>t</em><em>e</em><em>c</em><em>h</em></sub> + <em>W</em><sub><em>s</em><em>o</em><em>f</em><em>t</em></sub> + <em>W</em><sub><em>e</em><em>x</em><em>p</em></sub> + <em>W</em><sub><em>c</em><em>t</em><em>x</em></sub> = 1.0.</span> The final score is: <span class="math display">$$\begin{split}
+S_{final}={}&amp;(S_{tech}W_{tech})+(S_{soft}W_{soft})\\
+&amp;+(S_{exp}W_{exp})+(S_{ctx}W_{ctx})+B.
+\end{split}$$</span> The extra-skill bonus <span class="math inline"><em>B</em></span> is computed from skills that appear in the resume but are not explicitly required by the job: <span class="math display">$$B=\min\left(|T_R-T_J|\times \frac{B_{max}}{10},B_{max}\right).$$</span> The cap prevents score inflation when candidates list many adjacent technologies.</p>
+<h2 id="explanation-and-complexity">Explanation and Complexity</h2>
+<p>The explanation generator reports the match band, final score, experience status, matched skills, missing skills, extra technical skills, and score breakdown. This deterministic template is intentionally direct: a recruiter can immediately see whether a candidate is missing PostgreSQL, REST, or another required capability. Let <span class="math inline"><em>n</em></span> be the number of resumes, <span class="math inline"><em>d</em></span> the TF-IDF vocabulary size, and <span class="math inline"><em>k</em></span> the skill ontology size. Digital parsing is approximately linear in document length, skill matching is proportional to ontology coverage, and final sorting is <span class="math inline"><em>O</em>(<em>n</em>log <em>n</em>)</span>. OCR is the expensive branch, but it is invoked only for image files or failed digital extraction. This conditional design preserves speed while still reducing format bias.</p>
+<h2 id="feature-engineering-rationale">Feature Engineering Rationale</h2>
+<p>The framework separates hard evidence from soft evidence. Explicit technical skills and years of experience are treated as bounded requirements, while contextual similarity and soft-skill terms help distinguish candidates with similar hard-skill coverage. The extra-skill bonus is separated from the base score so that adjacent skills such as Docker or Redis add value without hiding missing required skills such as PostgreSQL or REST.</p>
+<h1 id="implementation">Implementation</h1>
+<p>The prototype was implemented as a modular Python web application. Flask provides the backend server and routing. The document parsing layer uses native file readers and OCR fallback. The NLP layer uses SpaCy tokenization, lemmatization, named-entity extraction, regular expressions, and curated skill dictionaries. The matching layer uses scikit-learn TF-IDF vectorization and cosine similarity. The dashboard is built using HTML, CSS, Bootstrap, Jinja2 templates, JavaScript, Matplotlib, and Chart.js.</p>
+<div class="tabularx">
+<p><span>|p<span>0.28</span>|Y|</span> <strong>Component</strong> &amp; <strong>Technology and Purpose</strong><br />
+Backend &amp; Python and Flask for routing, upload handling, and session flow.<br />
+NLP &amp; SpaCy tokenization, lemmatization, NER, regular expressions, and skill dictionaries for extraction.<br />
+Similarity &amp; TF-IDF and cosine similarity for contextual matching.<br />
+Parsing &amp; PyPDF2, python-docx, text reading, image parsing, dots.mocr/Tesseract OCR fallback, and PDF-to-image conversion for scanned documents.<br />
+Storage &amp; SQLite, SQLAlchemy, Flask-Login, password hashing, and optional Google OAuth SSO for lightweight user/session persistence.<br />
+Frontend &amp; Bootstrap, Jinja2, JavaScript, Matplotlib Base64 charts, and Chart.js for dashboards.<br />
+</p>
+</div>
+<h2 id="backend-flow">Backend Flow</h2>
+<p>When a recruiter uploads resumes and a job description, the backend stores uploaded content and weight settings server-side under a UUID key. Each resume is processed through the parser, NLP extractor, matching engine, and explanation layer. Results are returned as structured objects containing candidate name, score components, matched skills, missing skills, bonus skills, detected soft skills, and generated explanation text. The separation of concerns keeps the parser, matcher, and explainer independently testable.</p>
+<h2 id="concurrency-and-user-experience">Concurrency and User Experience</h2>
+<p>Batch screening can create long-running requests if all files are processed synchronously. The prototype therefore starts a daemon background thread and lets the analysis page poll a status endpoint while processing continues. The recruiter configures weights, uploads documents, waits for completion, and then reviews ranked results with score explanations. This supports quick triage while preserving transparency.</p>
+<h2 id="recruiter-controlled-weighting">Recruiter-Controlled Weighting</h2>
+<p>The frontend provides controls for tuning the scoring weights before the run. Four primary sliders share a normalized 100% pool for technical skills, soft skills, experience, and context. A fifth bonus slider is isolated because the bonus is an additive capped offset. This allows technical roles to prioritize hard skills while management-oriented roles can assign more weight to soft skills and experience. Fig. <a href="#fig:config" data-reference-type="ref" data-reference="fig:config">1</a> shows the scoring configuration interface.</p>
+<figure>
+<img src="ai_scoring_configuration.png" id="fig:config" alt="Recruiter-facing scoring configuration with adjustable weights." /><figcaption aria-hidden="true">Recruiter-facing scoring configuration with adjustable weights.</figcaption>
+</figure>
+<h2 id="explainable-output">Explainable Output</h2>
+<p>The result dashboard does not expose only a single final score. It decomposes the score into technical skills, soft skills, experience, context match, and bonus contribution. The expanded explanation panel lists matched and missing job-description skills, which makes the score traceable. Fig. <a href="#fig:xai" data-reference-type="ref" data-reference="fig:xai">2</a> shows the explainable score breakdown interface.</p>
+<figure>
+<img src="ai_score_breakdown.png" id="fig:xai" alt="Explainable AI score breakdown for recruiter auditability." /><figcaption aria-hidden="true">Explainable AI score breakdown for recruiter auditability.</figcaption>
+</figure>
+<h2 id="illustrative-processing-case">Illustrative Processing Case</h2>
+<p>For a job description requiring Python, Django, PostgreSQL, and REST with three years of experience, a candidate who lists Python, Django, six years of experience, and extra skills such as AWS, Docker, Kubernetes, and Redis receives a technical score of <span class="math inline">2/4 = 50%</span>. The experience score is capped at <span class="math inline">100%</span>, and the extra-skill bonus contributes 2.0% under the configured cap. The final explanation states that the candidate satisfies experience, matches Python and Django, misses PostgreSQL and REST, and has additional adjacent skills. This demonstrates the raw-text to structured-evidence to score-and-explanation flow.</p>
+<h1 id="experimental-setup">Experimental Setup</h1>
+<p>The framework was evaluated using five benchmarks designed around practical recruitment risks: format bias, keyword stuffing, mathematical boundary errors, semantic mismatch, and batch efficiency. The experiments measure technical skill score, soft skill score, experience score, context score, bonus score, final score, execution time, peak memory, and explanation quality. Each benchmark is implemented as a separate test script so that parser behavior, scoring behavior, explainability, semantic trade-offs, and runtime behavior can be reproduced independently.</p>
+<h2 id="benchmark-1-format-bias-and-ocr-resilience">Benchmark 1: Format Bias and OCR Resilience</h2>
+<p>The same resume content was stored as a text file, digital PDF, and image file. The objective was to test whether different file formats produced substantially different final scores. This benchmark evaluates whether the OCR fallback can recover enough text from an image resume to avoid format-based penalty.</p>
+<h2 id="benchmark-2-dilution-and-keyword-stuffing">Benchmark 2: Dilution and Keyword Stuffing</h2>
+<p>The job description was configured to require four technical competencies: Django, PostgreSQL, Python, and REST. Three profiles were evaluated: a baseline profile, a verbose profile containing irrelevant hobbies and unrelated text, and a keyword-stuffing profile containing repeated job-description terms. The objective was to test whether contextual TF-IDF prevents irrelevant verbosity and repetition from dominating the final score.</p>
+<h2 id="benchmark-3-explainability-and-mathematical-bounds">Benchmark 3: Explainability and Mathematical Bounds</h2>
+<p>An edge-case candidate with six years of experience was evaluated against a role requiring three years. The candidate also included extra technical skills not required in the job description. The objective was to verify that experience and bonus components remain bounded and that the system generates clear recruiter-readable explanations.</p>
+<h2 id="benchmark-4-architectural-comparison">Benchmark 4: Architectural Comparison</h2>
+<p>The proposed system was compared against a pure Sentence-BERT-style semantic approach and a hypothetical hybrid approach. The test resume used semantically related phrasing such as “RESTful” instead of “REST” and “directed a team” instead of “leadership”. This benchmark highlights the lexical limitations of the lightweight system and the semantic advantage of embeddings.</p>
+<h2 id="benchmark-5-efficiency-and-scalability">Benchmark 5: Efficiency and Scalability</h2>
+<p>A batch benchmark of 100 resumes compared the proposed Regex+TF-IDF architecture against semantic embedding alternatives. Execution time and peak memory were measured to evaluate deployment feasibility for cost-sensitive organizations.</p>
+<h1 id="results">Results</h1>
+<h2 id="format-bias-and-ocr-resilience">Format Bias and OCR Resilience</h2>
+<p>Table <a href="#tab:format" data-reference-type="ref" data-reference="tab:format">[tab:format]</a> shows that the image-based resume processed through OCR achieved the same final system score as the native text file. The digital PDF scored slightly lower due to spacing loss during extraction. This result supports the value of OCR fallback for format-bias mitigation.</p>
+<div class="tabularx">
+<p><span>0.96</span><span>|l|Y|c|c|</span> <strong>File</strong> &amp; <strong>Pipeline</strong> &amp; <strong>Context</strong> &amp; <strong>Final</strong><br />
+TXT &amp; Native digital parsing &amp; 66.0% &amp; 90.5%<br />
+PDF &amp; Digital PDF parsing &amp; 65.5% &amp; 90.0%<br />
+PNG &amp; OCR fallback &amp; 56.8% &amp; 90.5%<br />
+</p>
+</div>
+<h2 id="keyword-stuffing-resistance">Keyword-Stuffing Resistance</h2>
+<p>Table <a href="#tab:stuffing" data-reference-type="ref" data-reference="tab:stuffing">[tab:stuffing]</a> shows that the technical score remains 100% when all required technical skills are present, but the context score changes depending on relevance and dilution. The verbose profile suffers a context drop because relevant terms are diluted by unrelated content. The keyword-stuffing profile does not receive a perfect context score because TF-IDF weighting and cosine normalization limit the benefit of repeated terms when the overall document distribution remains abnormal.</p>
+<div class="tabularx">
+<p><span>|Y|c|c|c|</span> <strong>Profile</strong> &amp; <strong>Tech</strong> &amp; <strong>Context</strong> &amp; <strong>Final</strong><br />
+Baseline &amp; 100.0% &amp; 57.3% &amp; 93.6%<br />
+Verbose dilution &amp; 100.0% &amp; 19.0% &amp; 87.8%<br />
+Keyword stuffing &amp; 100.0% &amp; 37.4% &amp; 90.6%<br />
+</p>
+</div>
+<h2 id="boundary-and-explanation-validation">Boundary and Explanation Validation</h2>
+<p>For the edge-case candidate, the experience score was correctly computed as: <span class="math display">min (6/3, 1.0) × 100 = 100%.</span> The candidate did not receive 200% experience credit. Four extra skills produced a 2.0% bonus, remaining below the 5.0% cap. The generated explanation stated the final score, experience match, matched required skills, missing skills, extra skills, and score breakdown. This validates the boundary logic and confirms that the system can produce audit-ready reasoning.</p>
+<p>This benchmark is important because score inflation is a common problem in naive ranking systems. If every additional year of experience or every additional skill increased the score without limit, the ranking would favor long resumes and over-listed profiles. By capping experience and bonus contributions, the framework rewards qualification without allowing one component to dominate the entire score.</p>
+<h2 id="lexical-and-semantic-trade-offs">Lexical and Semantic Trade-Offs</h2>
+<p>Table <a href="#tab:semantic" data-reference-type="ref" data-reference="tab:semantic">[tab:semantic]</a> shows the semantic limitation of the proposed lightweight approach. Because the prototype uses bounded regular expression matching for hard skill requirements, it does not map “RESTful” to “REST” or “directed a team” to “leadership”. The Sentence-BERT-style approach handles this semantic relationship better, but it does not preserve the same hard-boundary explanation structure. The future hybrid approach offers a possible direction by combining strict skill verification with semantic context reward.</p>
+<div class="tabularx">
+<p><span>|Y|c|c|c|</span> <strong>Approach</strong> &amp; <strong>Tech</strong> &amp; <strong>Context</strong> &amp; <strong>Final</strong><br />
+Regex+TF-IDF &amp; 0.0% &amp; 13.4% &amp; 17.5%<br />
+Sentence-BERT &amp; N/A &amp; 58.4% &amp; 58.4%<br />
+Hybrid future &amp; 0.0% &amp; 58.4% &amp; 24.3%<br />
+</p>
+</div>
+<h2 id="efficiency-and-scalability">Efficiency and Scalability</h2>
+<p>Table <a href="#tab:efficiency" data-reference-type="ref" data-reference="tab:efficiency">[tab:efficiency]</a> reports the 100-resume batch benchmark. The proposed approach is substantially faster and lighter than the semantic alternatives. The measured time of 0.0062 seconds and peak memory of 0.12 MB demonstrate why the framework is suitable for first-pass screening in cost-constrained settings.</p>
+<div class="tabularx">
+<p><span>|Y|c|c|</span> <strong>Approach</strong> &amp; <strong>Time</strong> &amp; <strong>Peak RAM</strong><br />
+Regex+TF-IDF &amp; 0.0062 s &amp; 0.12 MB<br />
+Sentence-BERT &amp; 4.1860 s &amp; 7.33 MB<br />
+Hybrid future &amp; 3.7217 s &amp; 1.35 MB<br />
+</p>
+</div>
+<h2 id="summary-of-empirical-findings">Summary of Empirical Findings</h2>
+<p>Across the five benchmarks, the framework satisfies its intended design goals. The OCR fallback reduces file-format sensitivity. TF-IDF context scoring discourages irrelevant verbosity and limits the benefit of repeated keywords under the tested adversarial setup. Bounded experience and bonus calculations prevent score inflation. The architecture comparison confirms that the lightweight model sacrifices semantic flexibility, but this weakness is explicitly understood rather than hidden. The efficiency benchmark shows that the lightweight model has a significant deployment advantage for large initial batches.</p>
+<p>These findings support the central claim of the paper: a transparent lexical-statistical model can be a strong engineering choice when the system is used as an auditable first-pass filter. The result is not a universal ranking model, but a practical tool that improves speed and consistency while keeping recruiter judgment in the loop.</p>
+<h1 id="discussion">Discussion</h1>
+<p>The results indicate that the proposed system is best understood as a first-pass filter, not as a complete hiring intelligence platform. It can rapidly identify candidates who clearly lack explicit qualifications while preserving an explanation trail. For high-volume job postings, this staged approach is operationally useful: a lightweight lexical system can perform the initial pass quickly, while human review or semantic matching can be reserved for a smaller shortlist.</p>
+<p>The explanation mechanism is deliberately simple. Since every score component is computed from an explicit field, the system directly states which requirements were matched and which were missing. This style of explanation is suited to HR users who need actionable justification rather than model-internals visualization. It also helps maintenance because extraction errors can be traced to the skill dictionary, parser output, or normalization rules.</p>
+<p>The architecture avoids GPU dependencies and external API calls, making it practical for classroom demonstration, small HR teams, or early-stage organizations. The OCR fallback contributes to fairness by reducing format bias, but fairness in recruitment is broader than file handling <span class="citation" data-cites="b4"></span>. The system should therefore be used to prioritize review, not to reject candidates without human oversight. A future hybrid design could preserve deterministic hard-skill checks while using embeddings for contextual and soft-skill inference.</p>
+<h1 id="limitations">Limitations</h1>
+<p>The most important limitation is the lexical gap. The system may fail to reward semantically equivalent phrasing if the exact skill token is absent. For example, “RESTful services” may not match a strict requirement for “REST” depending on ontology design. Similarly, soft-skill evidence may be expressed through narrative rather than direct words such as “leadership”.</p>
+<p>The skill ontology is curated and therefore requires maintenance. New technologies, abbreviations, and synonyms must be added to keep the system current. The OCR fallback improves robustness, but OCR can still fail on complex layouts, handwritten content, low-resolution scans, or heavily graphical resumes. The benchmark dataset is also limited and should be expanded with real-world resumes across industries and formats.</p>
+<p>Finally, the system measures document-role alignment, not candidate quality in a complete sense. It cannot evaluate interview performance, portfolio depth, communication ability, or cultural fit. Its purpose is to support recruiters in prioritizing review, not to replace human decision-making.</p>
+<h2 id="validity-considerations">Validity Considerations</h2>
+<p>The benchmark suite is focused and controlled, but it is not a large industrial dataset. Results may differ on highly visual templates, multilingual documents, or specialized industries. The system also depends on ontology coverage; missing aliases such as “Postgres” for “PostgreSQL” can reduce recall. OCR quality depends on image resolution, layout complexity, and scan noise. Finally, timing results should be interpreted as prototype measurements rather than universal constants, although the relative efficiency advantage of TF-IDF over embedding models remains technically expected.</p>
+<h1 id="future-work">Future Work</h1>
+<p>Future work can improve the framework in four directions. First, a controlled synonym expansion layer can reduce lexical brittleness while preserving deterministic explanations. Second, a hybrid model can combine rule-based hard-skill verification with Sentence-BERT or another embedding model for the contextual component. Third, the skill ontology can be moved from static dictionaries to an updateable skill graph with aliases and related technologies. Fourth, fairness evaluation can be expanded using larger datasets with format diversity, role diversity, and adversarial resume patterns.</p>
+<p>An additional future direction is role-specific calibration. Different job families require different scoring behavior. Engineering roles may emphasize technical skills, while management roles may require more nuanced weighting for communication, leadership, and years of experience. The current weight sliders provide an initial mechanism, but future systems can learn recommended weight profiles from recruiter feedback.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This paper presented an explainable and cost-efficient AI resume screening framework for first-pass recruitment filtering. The system combines OCR-aware parsing, rule-guided skill extraction, TF-IDF cosine similarity, bounded weighted scoring, and plain-language explanations. Experimental benchmarks show that the framework handles multiple file formats, resists simple keyword-stuffing behavior, preserves mathematical score boundaries, and processes resume batches with very low time and memory requirements. The approach does not eliminate the semantic advantages of transformer models, but it demonstrates that lightweight methods remain valuable when transparency, cost, and deployment simplicity are primary constraints. The proposed framework is therefore suitable as an auditable screening layer that narrows applicant pools before human review or deeper semantic analysis.</p>
+<div class="thebibliography">
+<p><span>00</span></p>
+<p>“AI-Powered Resume Parsing using Django: A Smart Recruitment Solution,” <em>IEEE Xplore</em>, 2026.</p>
+<p>“Resume2Vec: Transforming Applicant Tracking Systems with Intelligent Resume Embeddings for Precise Candidate Matching,” <em>Electronics</em>, vol. 14, no. 4, 2025.</p>
+<p>“Intelligent Resume Analysis and Skill Matching Using NLP,” <em>IEEE Xplore</em>, 2026.</p>
+<p>“Adversarial Debiasing in Resume Screening for ICT Positions,” e-Repositori UPF, 2024.</p>
+<p>“AI Hiring with LLMs: A Context-Aware and Explainable Multi-Agent Framework for Resume Screening,” <em>IEEE Computer Society</em>, 2025.</p>
+<p>“Applying BERT-Based NLP for Automated Resume Screening and Candidate Ranking,” 2025.</p>
+<p>“Efficient CV Parsing: Lightweight Models and Heuristic Methods for Diverse and Non-Standard Formats,” <em>IEEE Xplore</em>, 2025.</p>
+<p>“Explainable artificial intelligence in the talent recruitment process: A literature review,” <em>Cogent Business &amp; Management</em>, 2025.</p>
+<p>“Mitigating Bias in AI Model Using eXplainable AI in Terms of Hiring Process in the Industry,” <em>IEEE Xplore</em>, 2025.</p>
+<p>“Benchmarking AI-Driven Resume Screening: An Evaluation of Precision and Efficiency,” <em>IEEE Xplore</em>, 2025.</p>
+<p>“AI-Driven Resume Analysis and Enhancement Using Semantic Modeling and Large Language Feedback Loops,” <em>ACL Anthology</em>, 2025.</p>
+<p>“Enhanced Resume Screening for Smart Hiring Using Sentence-Bidirectional Encoder Representations from Transformers,” <em>International Journal of Advanced Computer Science and Applications</em>, 2024.</p>
+<p>“AI Hiring with LLMs: A Context-Aware and Explainable Multi-Agent Framework for Resume Screening,” arXiv:2504.02870, 2025.</p>
+<p>“Enhancing Recruitment Transparency and Efficiency with Explainable AI,” <em>IEEE Computer Society</em>, 2024.</p>
+<p>“Layout Analysis for Robust Resume Parsing,” <em>IEEE Xplore</em>, 2024.</p>
+<p>“Resume Parsing and Skill Extraction using Custom Pattern Matching Algorithm and Gemini API,” <em>IEEE Xplore</em>, 2024.</p>
+</div>
+</body>
+</html>

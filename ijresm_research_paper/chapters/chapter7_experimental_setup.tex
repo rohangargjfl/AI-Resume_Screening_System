@@ -1,0 +1,17 @@
+\section{Experimental Setup}
+The framework was evaluated using five benchmarks designed around practical recruitment risks: format bias, keyword stuffing, mathematical boundary errors, semantic mismatch, and batch efficiency. The experiments measure technical skill score, soft skill score, experience score, context score, bonus score, final score, execution time, peak memory, and explanation quality. Each benchmark is implemented as a separate test script so that parser behavior, scoring behavior, explainability, semantic trade-offs, and runtime behavior can be reproduced independently.
+
+\subsection{Benchmark 1: Format Bias and OCR Resilience}
+The same resume content was stored as a text file, digital PDF, and image file. The objective was to test whether different file formats produced substantially different final scores. This benchmark evaluates whether the OCR fallback can recover enough text from an image resume to avoid format-based penalty.
+
+\subsection{Benchmark 2: Dilution and Keyword Stuffing}
+The job description was configured to require four technical competencies: Django, PostgreSQL, Python, and REST. Three profiles were evaluated: a baseline profile, a verbose profile containing irrelevant hobbies and unrelated text, and a keyword-stuffing profile containing repeated job-description terms. The objective was to test whether contextual TF-IDF prevents irrelevant verbosity and repetition from dominating the final score.
+
+\subsection{Benchmark 3: Explainability and Mathematical Bounds}
+An edge-case candidate with six years of experience was evaluated against a role requiring three years. The candidate also included extra technical skills not required in the job description. The objective was to verify that experience and bonus components remain bounded and that the system generates clear recruiter-readable explanations.
+
+\subsection{Benchmark 4: Architectural Comparison}
+The proposed system was compared against a pure Sentence-BERT-style semantic approach and a hypothetical hybrid approach. The test resume used semantically related phrasing such as ``RESTful'' instead of ``REST'' and ``directed a team'' instead of ``leadership''. This benchmark highlights the lexical limitations of the lightweight system and the semantic advantage of embeddings.
+
+\subsection{Benchmark 5: Efficiency and Scalability}
+A batch benchmark of 100 resumes compared the proposed Regex+TF-IDF architecture against semantic embedding alternatives. Execution time and peak memory were measured to evaluate deployment feasibility for cost-sensitive organizations.

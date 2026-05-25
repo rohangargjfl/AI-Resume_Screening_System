@@ -1,0 +1,103 @@
+\section{Results}
+\subsection{Format Bias and OCR Resilience}
+Table~\ref{tab:format} shows that the image-based resume processed through OCR achieved the same final system score as the native text file. The digital PDF scored slightly lower due to spacing loss during extraction. This result supports the value of OCR fallback for format-bias mitigation.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{0.96\columnwidth}{|l|Y|c|c|}
+\hline
+\rowcolor{gray!25}
+\textbf{File} & \textbf{Pipeline} & \textbf{Context} & \textbf{Final}\\
+\hline
+TXT & Native digital parsing & 66.0\% & 90.5\%\\
+\hline
+PDF & Digital PDF parsing & 65.5\% & 90.0\%\\
+\hline
+PNG & OCR fallback & 56.8\% & 90.5\%\\
+\hline
+\end{tabularx}
+\caption{Benchmark 1: Format Bias and OCR Resilience}
+\label{tab:format}
+\end{table}
+
+\subsection{Keyword-Stuffing Resistance}
+Table~\ref{tab:stuffing} shows that the technical score remains 100\% when all required technical skills are present, but the context score changes depending on relevance and dilution. The verbose profile suffers a context drop because relevant terms are diluted by unrelated content. The keyword-stuffing profile does not receive a perfect context score because TF-IDF weighting and cosine normalization limit the benefit of repeated terms when the overall document distribution remains abnormal.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\columnwidth}{|Y|c|c|c|}
+\hline
+\rowcolor{gray!25}
+\textbf{Profile} & \textbf{Tech} & \textbf{Context} & \textbf{Final}\\
+\hline
+Baseline & 100.0\% & 57.3\% & 93.6\%\\
+\hline
+Verbose dilution & 100.0\% & 19.0\% & 87.8\%\\
+\hline
+Keyword stuffing & 100.0\% & 37.4\% & 90.6\%\\
+\hline
+\end{tabularx}
+\caption{Benchmark 2: Dilution and Keyword-Stuffing Resistance}
+\label{tab:stuffing}
+\end{table}
+
+\subsection{Boundary and Explanation Validation}
+For the edge-case candidate, the experience score was correctly computed as:
+\begin{equation}
+\min(6/3,1.0)\times 100=100\%.
+\end{equation}
+The candidate did not receive 200\% experience credit. Four extra skills produced a 2.0\% bonus, remaining below the 5.0\% cap. The generated explanation stated the final score, experience match, matched required skills, missing skills, extra skills, and score breakdown. This validates the boundary logic and confirms that the system can produce audit-ready reasoning.
+
+This benchmark is important because score inflation is a common problem in naive ranking systems. If every additional year of experience or every additional skill increased the score without limit, the ranking would favor long resumes and over-listed profiles. By capping experience and bonus contributions, the framework rewards qualification without allowing one component to dominate the entire score.
+
+\subsection{Lexical and Semantic Trade-Offs}
+Table~\ref{tab:semantic} shows the semantic limitation of the proposed lightweight approach. Because the prototype uses bounded regular expression matching for hard skill requirements, it does not map ``RESTful'' to ``REST'' or ``directed a team'' to ``leadership''. The Sentence-BERT-style approach handles this semantic relationship better, but it does not preserve the same hard-boundary explanation structure. The future hybrid approach offers a possible direction by combining strict skill verification with semantic context reward.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\columnwidth}{|Y|c|c|c|}
+\hline
+\rowcolor{gray!25}
+\textbf{Approach} & \textbf{Tech} & \textbf{Context} & \textbf{Final}\\
+\hline
+Regex+TF-IDF & 0.0\% & 13.4\% & 17.5\%\\
+\hline
+Sentence-BERT & N/A & 58.4\% & 58.4\%\\
+\hline
+Hybrid future & 0.0\% & 58.4\% & 24.3\%\\
+\hline
+\end{tabularx}
+\caption{Benchmark 4: Architectural Comparison}
+\label{tab:semantic}
+\end{table}
+
+\subsection{Efficiency and Scalability}
+Table~\ref{tab:efficiency} reports the 100-resume batch benchmark. The proposed approach is substantially faster and lighter than the semantic alternatives. The measured time of 0.0062 seconds and peak memory of 0.12 MB demonstrate why the framework is suitable for first-pass screening in cost-constrained settings.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabularx}{\columnwidth}{|Y|c|c|}
+\hline
+\rowcolor{gray!25}
+\textbf{Approach} & \textbf{Time} & \textbf{Peak RAM}\\
+\hline
+Regex+TF-IDF & 0.0062 s & 0.12 MB\\
+\hline
+Sentence-BERT & 4.1860 s & 7.33 MB\\
+\hline
+Hybrid future & 3.7217 s & 1.35 MB\\
+\hline
+\end{tabularx}
+\caption{Benchmark 5: Efficiency on 100 Resumes}
+\label{tab:efficiency}
+\end{table}
+
+\subsection{Summary of Empirical Findings}
+Across the five benchmarks, the framework satisfies its intended design goals. The OCR fallback reduces file-format sensitivity. TF-IDF context scoring discourages irrelevant verbosity and limits the benefit of repeated keywords under the tested adversarial setup. Bounded experience and bonus calculations prevent score inflation. The architecture comparison confirms that the lightweight model sacrifices semantic flexibility, but this weakness is explicitly understood rather than hidden. The efficiency benchmark shows that the lightweight model has a significant deployment advantage for large initial batches.
+
+These findings support the central claim of the paper: a transparent lexical-statistical model can be a strong engineering choice when the system is used as an auditable first-pass filter. The result is not a universal ranking model, but a practical tool that improves speed and consistency while keeping recruiter judgment in the loop.

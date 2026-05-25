@@ -1,0 +1,91 @@
+\section{Scoring Model and Algorithm}
+\subsection{End-to-End Screening Algorithm}
+The complete workflow is shown in Algorithm~\ref{alg:endtoend}. This algorithm is included explicitly because the project is best understood as a step-wise transformation from raw input files to ranked recruiter-facing output.
+
+\begin{figure}[!ht]
+\hrule
+\vspace{3pt}
+\refstepcounter{algorithm}\label{alg:endtoend}
+\textbf{Algorithm~\thealgorithm: OCR-Aware Explainable Resume Screening Pipeline}
+\vspace{3pt}
+\hrule
+\vspace{4pt}
+\begin{enumerate}
+    \item \textbf{Input:} Resume batch \(R\), job description \(J\), scoring weights \(W=(W_t,W_s,W_e,W_c)\), bonus cap \(B_{max}\).
+    \item Parse \(J\) and extract required technical skills, soft skills, and required experience.
+    \item For each resume \(r_i \in R\):
+    \begin{enumerate}
+        \item Detect file type of \(r_i\).
+        \item If the file is native text or a digital document, perform digital text extraction.
+        \item If extracted text length is below threshold \(\tau\), convert the file to image representation and invoke OCR fallback.
+        \item If the file is an image, apply OCR using the available OCR provider; if Tesseract fallback is required, flatten transparency, convert to grayscale, boost contrast, sharpen, binarize, and run OCR.
+        \item Normalize extracted text by lowercasing, removing noisy tokens, and standardizing spacing.
+        \item Extract candidate technical skills, soft skills, and years of experience using skill ontology and regular expressions.
+        \item Compute technical coverage, soft-skill coverage, capped experience match, and TF-IDF cosine similarity.
+        \item Compute capped extra-skill bonus from skills present in resume but absent in the job description.
+        \item Calculate final weighted score \(S_i\).
+        \item Generate explanation \(E_i\) from matched, missing, bonus, and score-breakdown fields.
+    \end{enumerate}
+    \item Sort all candidate outputs by \(S_i\) in descending order.
+    \item \textbf{Output:} Ranked candidate list \(L=\{(r_i,S_i,E_i)\}\) and dashboard visualizations.
+\end{enumerate}
+\vspace{2pt}
+\hrule
+\end{figure}
+
+\subsection{Parsing and Text Preparation}
+The parser uses a threshold \(\tau=50\) characters to decide whether native PDF extraction is sufficient. If a PDF returns fewer than \(\tau\) characters, the document is treated as scanned or parser-resistant and routed to OCR fallback. The parser also checks the PDF magic-byte header so that images renamed with a \texttt{.pdf} extension can be routed to image OCR. After extraction, text is lowercased and whitespace-normalized, while punctuation is intentionally preserved to protect technical tokens such as \texttt{C++}, \texttt{Node.js}, and experience ranges such as \texttt{1-3}.
+
+\subsection{Skill and Experience Extraction}
+Let \(T_J\) denote the set of technical skills required by the job description and \(T_R\) denote the set extracted from a resume. The technical skill score is:
+\begin{equation}
+S_{tech}=\frac{|T_J \cap T_R|}{|T_J|}\times 100.
+\end{equation}
+Similarly, if \(P_J\) is the set of requested soft skills and \(P_R\) is the set found in the resume, then:
+\begin{equation}
+S_{soft}=\frac{|P_J \cap P_R|}{|P_J|}\times 100.
+\end{equation}
+When a job description does not explicitly request soft skills, the soft component can be neutralized or assigned according to recruiter settings.
+
+Skill extraction is performed using boundary-aware matching. A direct substring search can create false positives; for example, matching ``R'' inside ``manager'' would be incorrect. The extractor therefore treats skills as tokens or multi-word expressions with boundary conditions. Soft skills are also matched explicitly, which keeps the method transparent but limits semantic recall for indirectly stated traits.
+
+Experience is treated as a bounded requirement. If \(Y_R\) is detected candidate experience and \(Y_J\) is required experience, the experience score is:
+\begin{equation}
+S_{exp}=\min\left(\frac{Y_R}{Y_J},1.0\right)\times 100.
+\end{equation}
+The cap prevents a candidate with double the required experience from receiving a mathematically inflated 200\% experience score.
+
+\subsection{Contextual Similarity}
+The system uses TF-IDF vectorization to represent the resume and job description as vectors. The primary implementation uses scikit-learn's \texttt{TfidfVectorizer} with English stop-word removal, a maximum vocabulary size of 5000, and unigram-plus-bigram features \((1,2)\). The bi-gram setting captures short technical phrases such as ``machine learning'' without loading a neural embedding model. Let \(A\) be the resume vector and \(B\) be the job-description vector. Their contextual similarity is computed by cosine similarity:
+\begin{equation}
+S_{ctx}=\frac{A \cdot B}{\|A\|\|B\|}\times 100.
+\end{equation}
+TF-IDF rewards distinctive terms more strongly than generic words. In combination with cosine normalization, it reduces the benefit of simply making a resume longer or repeatedly inserting a subset of terms, which is useful for resisting simple keyword-stuffing attacks.
+
+\subsection{Bounded Weighted Score}
+Recruiters may tune component weights before analysis. The default configuration used in the prototype is:
+\begin{equation}
+W_{tech}=0.60,\quad W_{soft}=0.10,\quad W_{exp}=0.15,\quad W_{ctx}=0.15,
+\end{equation}
+where:
+\begin{equation}
+W_{tech}+W_{soft}+W_{exp}+W_{ctx}=1.0.
+\end{equation}
+The final score is:
+\begin{equation}
+\begin{split}
+S_{final}={}&(S_{tech}W_{tech})+(S_{soft}W_{soft})\\
+&+(S_{exp}W_{exp})+(S_{ctx}W_{ctx})+B.
+\end{split}
+\end{equation}
+The extra-skill bonus \(B\) is computed from skills that appear in the resume but are not explicitly required by the job:
+\begin{equation}
+B=\min\left(|T_R-T_J|\times \frac{B_{max}}{10},B_{max}\right).
+\end{equation}
+The cap prevents score inflation when candidates list many adjacent technologies.
+
+\subsection{Explanation and Complexity}
+The explanation generator reports the match band, final score, experience status, matched skills, missing skills, extra technical skills, and score breakdown. This deterministic template is intentionally direct: a recruiter can immediately see whether a candidate is missing PostgreSQL, REST, or another required capability. Let \(n\) be the number of resumes, \(d\) the TF-IDF vocabulary size, and \(k\) the skill ontology size. Digital parsing is approximately linear in document length, skill matching is proportional to ontology coverage, and final sorting is \(O(n\log n)\). OCR is the expensive branch, but it is invoked only for image files or failed digital extraction. This conditional design preserves speed while still reducing format bias.
+
+\subsection{Feature Engineering Rationale}
+The framework separates hard evidence from soft evidence. Explicit technical skills and years of experience are treated as bounded requirements, while contextual similarity and soft-skill terms help distinguish candidates with similar hard-skill coverage. The extra-skill bonus is separated from the base score so that adjacent skills such as Docker or Redis add value without hiding missing required skills such as PostgreSQL or REST.
