@@ -1,8 +1,12 @@
 """
-Matching Engine – computes a weighted match score based on 
-explicitly extracted technical vs soft skills, blended with baseline TF-IDF text similarity.
+Matching Engine – computes a weighted match score based on
+explicitly extracted technical vs soft skills, blended with a selectable
+context similarity engine.
 Returns both final scores AND detailed breakdowns for explainability.
 """
+
+import os
+import threading
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -11,6 +15,12 @@ from feature_extraction import FeatureExtractor
 
 class MatchingEngine:
     """Compute match scores heavily weighted towards technical skills."""
+
+    MINILM_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+    CONTEXT_MODEL_LABELS = {
+        "tfidf": "Basic TF-IDF Cosine",
+        "minilm": "Advanced MiniLM Semantic",
+    }
 
     def __init__(self, text_weight: float = 0.3, skills_weight: float = 0.7):
         self.text_weight = text_weight
@@ -21,6 +31,9 @@ class MatchingEngine:
         self.soft_ratio = 0.2
         
         self.extractor = FeatureExtractor()
+        self._minilm_tokenizer = None
+        self._minilm_model = None
+        self._minilm_lock = threading.Lock()
 
     def _calculate_skill_score(self, required: list[str], found: list[str]) -> float:
         """Returns percentage (0.0 to 1.0) of required skills that were found."""
@@ -33,6 +46,105 @@ class MatchingEngine:
         matched = req_set.intersection(found_set)
         return len(matched) / len(req_set)
 
+    def _normalise_context_mode(self, context_mode: str | None) -> str:
+        """Return a supported context similarity mode."""
+        if not context_mode:
+            return "tfidf"
+
+        context_mode = context_mode.lower().strip()
+        if context_mode in {"advanced", "semantic", "sentence_bert", "sentence-bert"}:
+            return "minilm"
+        if context_mode in {"basic", "lexical"}:
+            return "tfidf"
+        return context_mode if context_mode in self.CONTEXT_MODEL_LABELS else "tfidf"
+
+    def _tfidf_similarities(self, jd_text: str, resumes: list[dict]) -> np.ndarray:
+        """Return JD-to-resume cosine similarities using the fast TF-IDF engine."""
+        all_docs = [jd_text] + [r['text'] for r in resumes]
+        tfidf_matrix = self.extractor.tfidf_vectors(all_docs)
+        return cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+
+    def _load_minilm(self):
+        """Lazy-load MiniLM once, only when Advanced mode is selected."""
+        if self._minilm_tokenizer is not None and self._minilm_model is not None:
+            return self._minilm_tokenizer, self._minilm_model
+
+        with self._minilm_lock:
+            if self._minilm_tokenizer is not None and self._minilm_model is not None:
+                return self._minilm_tokenizer, self._minilm_model
+
+            os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+            from transformers import AutoModel, AutoTokenizer
+
+            tokenizer = AutoTokenizer.from_pretrained(self.MINILM_MODEL_NAME, local_files_only=True)
+            model = AutoModel.from_pretrained(self.MINILM_MODEL_NAME, local_files_only=True)
+            model.eval()
+
+            self._minilm_tokenizer = tokenizer
+            self._minilm_model = model
+            return tokenizer, model
+
+    @staticmethod
+    def _mean_pooling(model_output, attention_mask):
+        """Mean-pool transformer token embeddings while ignoring padding tokens."""
+        import torch
+
+        token_embeddings = model_output.last_hidden_state
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        summed = torch.sum(token_embeddings * input_mask_expanded, dim=1)
+        counts = torch.clamp(input_mask_expanded.sum(dim=1), min=1e-9)
+        return summed / counts
+
+    def _minilm_similarities(self, jd_text: str, resumes: list[dict]) -> np.ndarray:
+        """Return JD-to-resume cosine similarities using all-MiniLM-L6-v2 embeddings."""
+        import torch
+        import torch.nn.functional as functional
+
+        tokenizer, model = self._load_minilm()
+        docs = [jd_text] + [r['text'] for r in resumes]
+        encoded = tokenizer(
+            docs,
+            padding=True,
+            truncation=True,
+            max_length=512,
+            return_tensors="pt",
+        )
+
+        with torch.no_grad():
+            output = model(**encoded)
+            embeddings = self._mean_pooling(output, encoded["attention_mask"])
+            embeddings = functional.normalize(embeddings, p=2, dim=1)
+
+        sims = torch.matmul(embeddings[0:1], embeddings[1:].T).squeeze(0)
+        return sims.cpu().numpy()
+
+    def _context_similarities(self, jd_text: str, resumes: list[dict], context_mode: str | None):
+        """Return context similarities plus metadata for the selected engine."""
+        mode = self._normalise_context_mode(context_mode)
+
+        if mode == "minilm":
+            try:
+                sims = self._minilm_similarities(jd_text, resumes)
+                return sims, {
+                    "context_model": "minilm",
+                    "context_model_label": self.CONTEXT_MODEL_LABELS["minilm"],
+                    "context_model_warning": "",
+                }
+            except Exception as exc:
+                sims = self._tfidf_similarities(jd_text, resumes)
+                return sims, {
+                    "context_model": "tfidf_fallback",
+                    "context_model_label": "Basic TF-IDF Cosine (MiniLM fallback)",
+                    "context_model_warning": f"MiniLM unavailable, used TF-IDF fallback: {exc}",
+                }
+
+        sims = self._tfidf_similarities(jd_text, resumes)
+        return sims, {
+            "context_model": "tfidf",
+            "context_model_label": self.CONTEXT_MODEL_LABELS["tfidf"],
+            "context_model_warning": "",
+        }
+
     def compute_scores(
         self,
         jd_text: str,
@@ -41,6 +153,7 @@ class MatchingEngine:
         resumes: list[dict],
         jd_yoe: int = 0,
         weights: dict = None,
+        context_mode: str = "tfidf",
     ) -> list[float]:
         """Return list of match scores (0‑100) for each resume using dynamically weighted sum."""
         if not resumes:
@@ -49,10 +162,8 @@ class MatchingEngine:
         if weights is None:
             weights = {'tech': 0.60, 'yoe': 0.15, 'context': 0.15, 'soft': 0.10, 'bonus': 0.05}
 
-        # 1. Baseline Text Similarity (TF-IDF)
-        all_docs = [jd_text] + [r['text'] for r in resumes]
-        tfidf_matrix = self.extractor.tfidf_vectors(all_docs)
-        text_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+        # 1. Context Similarity (Basic TF-IDF or Advanced MiniLM)
+        text_sim, _ = self._context_similarities(jd_text, resumes, context_mode)
 
         # 2. Explicit Skill & Experience Matching (Weighted Sum)
         final_scores = []
@@ -93,6 +204,7 @@ class MatchingEngine:
         resumes: list[dict],
         jd_yoe: int = 0,
         weights: dict = None,
+        context_mode: str = "tfidf",
     ) -> list[dict]:
         """Return detailed score breakdowns including matched, extra missing, and bonuses."""
         if not resumes:
@@ -101,10 +213,8 @@ class MatchingEngine:
         if weights is None:
             weights = {'tech': 0.60, 'yoe': 0.15, 'context': 0.15, 'soft': 0.10, 'bonus': 0.05}
 
-        # 1. Baseline Text Similarity (TF-IDF)
-        all_docs = [jd_text] + [r['text'] for r in resumes]
-        tfidf_matrix = self.extractor.tfidf_vectors(all_docs)
-        text_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+        # 1. Context Similarity (Basic TF-IDF or Advanced MiniLM)
+        text_sim, context_meta = self._context_similarities(jd_text, resumes, context_mode)
 
         results = []
         for i, resume in enumerate(resumes):
@@ -158,6 +268,7 @@ class MatchingEngine:
                 'extra_skills_bonus': round(extra_bonus * 100, 1),
                 'jd_yoe': jd_yoe,
                 'resume_yoe': resume_yoe,
+                **context_meta,
             })
 
         return results

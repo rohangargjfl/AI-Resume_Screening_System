@@ -11,7 +11,7 @@ The job description was configured to require four technical competencies: Djang
 An edge-case candidate with six years of experience was evaluated against a role requiring three years. The candidate also included extra technical skills not required in the job description. The objective was to verify that experience and bonus components remain bounded and that the system generates clear recruiter-readable explanations.
 
 \subsection{Benchmark 4: Architectural Comparison}
-The proposed system was compared against a pure Sentence-BERT-style semantic approach and a hypothetical hybrid approach. The test resume used semantically related phrasing such as ``RESTful'' instead of ``REST'' and ``directed a team'' instead of ``leadership''. This benchmark highlights the lexical limitations of the lightweight system and the semantic advantage of embeddings.
+The proposed system was compared against a pure Sentence-BERT-style semantic approach and an optional hybrid configuration that preserves regex-based hard-skill verification while replacing the context component with a semantic embedding score. The test resume used semantically related phrasing such as ``RESTful'' instead of ``REST'' and ``directed a team'' instead of ``leadership''. This benchmark highlights the lexical limitations of the lightweight system and the semantic advantage of embeddings.
 
 \subsection{Benchmark 5: Efficiency and Scalability}
 A batch benchmark of 100 resumes compared the proposed Regex+TF-IDF architecture against semantic embedding alternatives. Execution time and peak memory were measured to evaluate deployment feasibility for cost-sensitive organizations.

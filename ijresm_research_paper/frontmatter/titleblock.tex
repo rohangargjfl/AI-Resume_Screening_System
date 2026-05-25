@@ -1,35 +1,27 @@
 \twocolumn[
 \begin{@twocolumnfalse}
 \begin{center}
-{\fontsize{24}{28}\selectfont\bfseries An Explainable and Cost-Efficient AI Resume Screening Framework Using OCR-Aware Parsing, TF-IDF Similarity, and Bounded Weighted Scoring\par}
-\vspace{11pt}
-\renewcommand{\arraystretch}{1.25}
-\begin{tabular}{|>{\centering\arraybackslash}p{0.295\textwidth}|>{\centering\arraybackslash}p{0.295\textwidth}|>{\centering\arraybackslash}p{0.295\textwidth}|}
-\hline
-\multicolumn{3}{|c|}{%
-\begin{minipage}{0.90\textwidth}
-\centering
-\vspace{3pt}
-\guideblock
-\vspace{4pt}
-\end{minipage}}\\
-\hline
-\studentblock{Rohan Garg}{2K22/CO/375}
-&
-\studentblock{Punit Sukhani}{2K22/CO/353}
-&
-\studentblock{Saksham}{2K22/CO/395}\\
-\hline
-\end{tabular}
-\renewcommand{\arraystretch}{1.12}
-\end{center}
+{\fontsize{24}{28}\selectfont\bfseries An Explainable and Cost-Efficient AI Resume Screening Framework Using OCR-Aware Parsing, Switchable Context Similarity, and Bounded Weighted Scoring\par}
+\vspace{16pt}
+
+% --- AUTHOR NAMES (11pt) ---
+{\fontsize{11}{13}\selectfont
+Rohan Garg\textsuperscript{1}, Punit Sukhani\textsuperscript{1}, Saksham\textsuperscript{1}, Mrs. Gull Kaur\textsuperscript{2}\par}
 \vspace{10pt}
 
+% --- AFFILIATIONS (8pt, Italicized) ---
+{\fontsize{8}{10}\selectfont
+\textit{\textsuperscript{1}Dept. of Computer Science \& Engg., Delhi Technological University, New Delhi, India}\par
+\vspace{2pt}
+\textit{\textsuperscript{2}Assistant Professor, Dept. of Computer Science \& Engg., Delhi Technological University, New Delhi, India}\par}
+\end{center}
+\vspace{14pt}
+
 \begin{ijresmabstract}
-The first stage of recruitment is increasingly mediated by automated resume screening systems. However, many available systems occupy two unsatisfactory extremes: simple keyword filters are fast but brittle, while transformer-based or large language model approaches provide richer semantic matching at higher computational cost and with reduced transparency. This paper presents a lightweight, explainable, and OCR-aware resume screening framework for first-pass candidate ranking. The proposed system accepts resumes in heterogeneous formats, normalizes text through digital parsing and optical character recognition fallback, extracts technical skills, soft skills, and years of experience through a rule-guided natural language processing layer, computes contextual relevance through TF-IDF cosine similarity, and produces a bounded weighted score with plain-language explanations. Five benchmarks evaluate format-bias resilience, keyword-stuffing resistance, mathematical boundary handling, lexical-versus-semantic trade-offs, and batch efficiency. Results show that the proposed Regex+TF-IDF architecture processes 100 resumes in 0.0062 seconds with 0.12 MB peak memory in the measured benchmark, while a Sentence-BERT baseline requires 4.1860 seconds and 7.33 MB. The system is not intended to replace human hiring judgment, but it provides a practical, auditable, and low-cost first-pass screening layer for small and medium-sized organizations.
+The first stage of recruitment is increasingly mediated by automated resume screening systems. However, many available systems occupy two unsatisfactory extremes: simple keyword filters are fast but brittle, while transformer-based or large language model approaches provide richer semantic matching at higher computational cost and with reduced transparency. This paper presents a lightweight, explainable, and OCR-aware resume screening framework for first-pass candidate ranking. The proposed system accepts resumes in heterogeneous formats, normalizes text through digital parsing and optical character recognition fallback, extracts technical skills, soft skills, and years of experience through a rule-guided natural language processing layer, computes contextual relevance through a switchable TF-IDF or MiniLM-based similarity component, and produces a bounded weighted score with plain-language explanations. Five benchmarks evaluate format-bias resilience, keyword-stuffing resistance, mathematical boundary handling, lexical-versus-semantic trade-offs, and batch efficiency. Results show that the default Regex+TF-IDF architecture processes 100 resumes in 0.0062 seconds with 0.12 MB peak memory in the measured benchmark, while a Sentence-BERT baseline requires 4.1860 seconds and 7.33 MB. The optional hybrid mode preserves deterministic skill verification while enabling semantic contextual comparison when additional computation is acceptable. The system is not intended to replace human hiring judgment, but it provides a practical, auditable, and low-cost first-pass screening layer for small and medium-sized organizations.
 \end{ijresmabstract}
 
-\ijresmkeywords{applicant tracking system, cosine similarity, explainable AI, natural language processing, OCR, recruitment automation, resume screening, TF-IDF}
+\ijresmkeywords{applicant tracking system, cosine similarity, explainable AI, MiniLM, natural language processing, OCR, recruitment automation, resume screening, TF-IDF}
 \vspace{2pt}
 \hrule
 \vspace{6pt}

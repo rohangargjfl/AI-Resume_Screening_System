@@ -83,7 +83,13 @@ def allowed_file(filename: str) -> bool:
 #  Background Analysis Worker
 # ------------------------------------------------------------------ #
 
-def _run_analysis(job_id: str, jd_text: str, raw_resumes: list[dict], weights: dict = None):
+def _run_analysis(
+    job_id: str,
+    jd_text: str,
+    raw_resumes: list[dict],
+    weights: dict = None,
+    context_mode: str = "tfidf",
+):
     """Run the full NLP + matching pipeline in a background thread."""
     try:
         # ----- Parse Resumes (potentially slow OCR — runs in background) -----
@@ -120,7 +126,8 @@ def _run_analysis(job_id: str, jd_text: str, raw_resumes: list[dict], weights: d
 
         # ----- Matching (with detailed breakdown) -----
         _job_store[job_id]['status'] = 'computing_scores'
-        _job_store[job_id]['message'] = 'Computing match scores with embeddings...'
+        context_label = "MiniLM semantic embeddings" if context_mode == "minilm" else "TF-IDF cosine similarity"
+        _job_store[job_id]['message'] = f'Computing match scores with {context_label}...'
 
         score_details = _get_matching_engine().compute_scores_detailed(
             jd_text=jd_text,
@@ -128,7 +135,8 @@ def _run_analysis(job_id: str, jd_text: str, raw_resumes: list[dict], weights: d
             jd_soft_skills=jd_nlp['soft_skills'],
             resumes=resume_nlp_list,
             jd_yoe=jd_nlp.get('years_of_experience', 0),
-            weights=weights
+            weights=weights,
+            context_mode=context_mode,
         )
 
         # ----- Explainability -----
@@ -175,6 +183,9 @@ def _run_analysis(job_id: str, jd_text: str, raw_resumes: list[dict], weights: d
                 'soft_chart': soft_chart,
                 'jd_skills': jd_nlp['technical_skills'],
                 'custom_weights': weights,
+                'context_mode': context_mode,
+                'context_model_label': score_details[0].get('context_model_label') if score_details else context_label,
+                'context_model_warning': score_details[0].get('context_model_warning') if score_details else '',
             },
         })
 
@@ -247,12 +258,17 @@ def upload():
                 'bonus': w_bonus / 100.0
             }
 
+        context_mode = request.form.get('context_mode', 'tfidf').strip().lower()
+        if context_mode not in {'tfidf', 'minilm'}:
+            context_mode = 'tfidf'
+
         # Store data server-side, put only the key in the cookie session
         data_id = str(uuid.uuid4())
         _data_store[data_id] = {
             'jd_text': jd_text,
             'raw_resumes': raw_resumes,
-            'weights': weights
+            'weights': weights,
+            'context_mode': context_mode,
         }
         session['data_id'] = data_id
         return redirect(url_for('main.analyze'))
@@ -300,7 +316,13 @@ def start_analysis():
     # Launch background thread (passes raw bytes; parsing happens inside thread)
     thread = threading.Thread(
         target=_run_analysis,
-        args=(job_id, data['jd_text'], data['raw_resumes'], data.get('weights')),
+        args=(
+            job_id,
+            data['jd_text'],
+            data['raw_resumes'],
+            data.get('weights'),
+            data.get('context_mode', 'tfidf'),
+        ),
         daemon=True,
     )
     thread.start()
@@ -348,4 +370,7 @@ def results():
         soft_chart=r['soft_chart'],
         jd_skills=r['jd_skills'],
         custom_weights=r.get('custom_weights'),
+        context_mode=r.get('context_mode', 'tfidf'),
+        context_model_label=r.get('context_model_label', 'Basic TF-IDF Cosine'),
+        context_model_warning=r.get('context_model_warning', ''),
     )

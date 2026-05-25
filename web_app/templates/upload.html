@@ -70,6 +70,24 @@
                         </div>
                         <div class="upload-card-body">
                             <p class="text-muted small mb-3">Dynamically adjust how the AI prioritizes candidate metrics. Sliders map relative to each other.</p>
+
+                            <div class="mb-4">
+                                <label class="form-label d-block text-muted small fw-bold">Context Similarity Mode</label>
+                                <div class="btn-group w-100" role="group" aria-label="Context similarity mode">
+                                    <input type="radio" class="btn-check" name="context_mode" id="context_tfidf" value="tfidf" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary" for="context_tfidf">
+                                        <i class="bi bi-lightning-charge"></i> Basic TF-IDF
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="context_mode" id="context_minilm" value="minilm" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="context_minilm">
+                                        <i class="bi bi-cpu"></i> Advanced MiniLM
+                                    </label>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0" id="contextModeHelp">
+                                    Fast lexical cosine similarity for low-resource first-pass filtering.
+                                </p>
+                            </div>
                             
                             <!-- Presets -->
                             <div class="mb-4">
@@ -99,7 +117,7 @@
 
                             <div class="weight-slider-group mb-3">
                                 <div class="d-flex justify-content-between">
-                                    <label for="weight_context" class="form-label mb-1">Context Match (TF-IDF)</label>
+                                    <label for="weight_context" class="form-label mb-1" id="contextWeightLabel">Context Match (TF-IDF)</label>
                                     <span class="weight-value fw-bold text-primary" id="val_context">15%</span>
                                 </div>
                                 <input type="range" class="form-range weight-slider" id="weight_context" name="weight_context" min="0" max="100" value="15">
@@ -163,6 +181,18 @@
 
         const bonusSlider = document.getElementById('weight_bonus');
         const bonusBadge = document.getElementById('val_bonus');
+        const contextHelp = document.getElementById('contextModeHelp');
+        const contextWeightLabel = document.getElementById('contextWeightLabel');
+        const contextModeCopy = {
+            'tfidf': {
+                label: 'Context Match (TF-IDF)',
+                help: 'Fast lexical cosine similarity for low-resource first-pass filtering.'
+            },
+            'minilm': {
+                label: 'Context Match (MiniLM)',
+                help: 'Semantic embedding similarity using all-MiniLM-L6-v2 for better synonym and meaning overlap.'
+            }
+        };
 
         function updateBadges() {
             let total = 0;
@@ -234,6 +264,14 @@
         // Bind Bonus Slider Separately (Doesn't affect 100% pool)
         bonusSlider.addEventListener('input', function() {
             bonusBadge.textContent = "+" + this.value + "%";
+        });
+
+        document.querySelectorAll('input[name="context_mode"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const copy = contextModeCopy[this.value] || contextModeCopy.tfidf;
+                contextWeightLabel.textContent = copy.label;
+                contextHelp.textContent = copy.help;
+            });
         });
         
         // Initial setup

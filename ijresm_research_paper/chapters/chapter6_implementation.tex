@@ -1,7 +1,7 @@
 \section{Implementation}
-The prototype was implemented as a modular Python web application. Flask provides the backend server and routing. The document parsing layer uses native file readers and OCR fallback. The NLP layer uses SpaCy tokenization, lemmatization, named-entity extraction, regular expressions, and curated skill dictionaries. The matching layer uses scikit-learn TF-IDF vectorization and cosine similarity. The dashboard is built using HTML, CSS, Bootstrap, Jinja2 templates, JavaScript, Matplotlib, and Chart.js.
+The prototype was implemented as a modular Python web application. Flask provides the backend server and routing. The document parsing layer uses native file readers and OCR fallback. The NLP layer uses SpaCy tokenization, lemmatization, named-entity extraction, regular expressions, and curated skill dictionaries. The matching layer uses scikit-learn TF-IDF vectorization for the default context mode and a lazily loaded MiniLM encoder for optional semantic context comparison. The dashboard is built using HTML, CSS, Bootstrap, Jinja2 templates, JavaScript, Matplotlib, and Chart.js.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \centering
 \small
 \begin{tabularx}{\columnwidth}{|p{0.28\columnwidth}|Y|}
@@ -13,7 +13,7 @@ Backend & Python and Flask for routing, upload handling, and session flow.\\
 \hline
 NLP & SpaCy tokenization, lemmatization, NER, regular expressions, and skill dictionaries for extraction.\\
 \hline
-Similarity & TF-IDF and cosine similarity for contextual matching.\\
+Similarity & TF-IDF cosine similarity in basic mode; MiniLM embedding cosine similarity in advanced mode.\\
 \hline
 Parsing & PyPDF2, python-docx, text reading, image parsing, dots.mocr/Tesseract OCR fallback, and PDF-to-image conversion for scanned documents.\\
 \hline
@@ -33,9 +33,9 @@ When a recruiter uploads resumes and a job description, the backend stores uploa
 Batch screening can create long-running requests if all files are processed synchronously. The prototype therefore starts a daemon background thread and lets the analysis page poll a status endpoint while processing continues. The recruiter configures weights, uploads documents, waits for completion, and then reviews ranked results with score explanations. This supports quick triage while preserving transparency.
 
 \subsection{Recruiter-Controlled Weighting}
-The frontend provides controls for tuning the scoring weights before the run. Four primary sliders share a normalized 100\% pool for technical skills, soft skills, experience, and context. A fifth bonus slider is isolated because the bonus is an additive capped offset. This allows technical roles to prioritize hard skills while management-oriented roles can assign more weight to soft skills and experience. Fig.~\ref{fig:config} shows the scoring configuration interface.
+The frontend provides controls for tuning the scoring weights before the run. Four primary sliders share a normalized 100\% pool for technical skills, soft skills, experience, and context. A fifth bonus slider is isolated because the bonus is an additive capped offset. The same interface also allows the recruiter to select basic TF-IDF context similarity or advanced MiniLM semantic context similarity. This allows technical roles to prioritize hard skills while management-oriented roles can assign more weight to soft skills and experience. Fig.~\ref{fig:config} shows the scoring configuration interface.
 
-\begin{figure}[t]
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=\columnwidth]{ai_scoring_configuration.png}
     \caption{Recruiter-facing scoring configuration with adjustable weights.}
@@ -45,7 +45,7 @@ The frontend provides controls for tuning the scoring weights before the run. Fo
 \subsection{Explainable Output}
 The result dashboard does not expose only a single final score. It decomposes the score into technical skills, soft skills, experience, context match, and bonus contribution. The expanded explanation panel lists matched and missing job-description skills, which makes the score traceable. Fig.~\ref{fig:xai} shows the explainable score breakdown interface.
 
-\begin{figure}[t]
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=\columnwidth]{ai_score_breakdown.png}
     \caption{Explainable AI score breakdown for recruiter auditability.}

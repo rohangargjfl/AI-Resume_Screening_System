@@ -32,6 +32,9 @@
                 <span class="badge bg-info text-dark rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
                     Context (JD Match): {{ (custom_weights['context'] * 100)|round|int }}%
                 </span>
+                <span class="badge bg-dark rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
+                    <i class="bi bi-diagram-3"></i> Context Engine: {{ context_model_label }}
+                </span>
                 <span class="badge bg-warning text-dark rounded-pill me-2 px-3 py-2 mb-2 shadow-sm">
                     Soft Skills: {{ (custom_weights['soft'] * 100)|round|int }}%
                 </span>
@@ -39,6 +42,13 @@
                     <i class="bi bi-star-fill"></i> Bonus Cap: +{{ (custom_weights.get('bonus', 0.05) * 100)|round|int }}%
                 </span>
             </div>
+            {% if context_model_warning %}
+            <div class="col-md-10 text-center">
+                <div class="alert alert-warning small mb-0 py-2">
+                    {{ context_model_warning }}
+                </div>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -142,7 +152,7 @@
                                                 <div class="col-6 col-md">
                                                     <div class="p-3 bg-white rounded shadow-sm border-start border-4 border-primary h-100">
                                                         <h4 class="mb-1 text-primary">{{ exp.breakdown.text_contribution }}%</h4>
-                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="Measures how similar the overall phrasing, context, and vocabulary of the resume is to the JD, beyond just exact skills.">Context Match <i class="bi bi-info-circle"></i></small>
+                                                        <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.70rem;" title="Measures JD-resume contextual similarity using {{ exp.breakdown.context_model_label }}.">Context Match <i class="bi bi-info-circle"></i></small>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-md">
@@ -152,7 +162,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p class="mt-3 mb-0 text-muted small"><i class="bi bi-info-circle"></i> The final score blends keyword-based skill extraction with semantic contextual understanding.</p>
+                                            <p class="mt-3 mb-0 text-muted small"><i class="bi bi-info-circle"></i> The final score blends strict skill extraction with {{ exp.breakdown.context_model_label }} for the contextual component.</p>
                                         </div>
                                     </div>
                                     <div class="row g-3">

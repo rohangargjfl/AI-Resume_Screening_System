@@ -18,7 +18,7 @@ The OCR fallback layer applies image preprocessing before character recognition.
 The normalized text is lowercased and processed by a lightweight NLP module. SpaCy's \texttt{en\_core\_web\_sm} model is used for tokenization, lemmatization, stop-word filtering, and named-entity extraction. Technical and soft skills are not extracted through generic NER; they are matched using strict regular-expression word boundaries against curated skill lists. This is done to avoid false positives such as matching a single-letter technical skill inside an unrelated word. The technical list includes terms such as Python, Django, REST, Docker, AWS, PostgreSQL, and related technologies, while the soft-skill list includes terms such as leadership, communication, collaboration, and cross-functional work. Regular expressions identify direct and indirect years-of-experience evidence such as ``5 years of experience'', ``experience: 5 years'', and date ranges.
 
 \subsection{Matching and Ranking Layer}
-The matching layer computes four principal components: technical skill score, soft skill score, years-of-experience score, and contextual similarity. Technical and soft scores are based on coverage of required skills. Experience is capped so that over-qualified candidates do not receive more than the maximum allotted experience weight. Contextual similarity is calculated using TF-IDF vectors and cosine similarity.
+The matching layer computes four principal components: technical skill score, soft skill score, years-of-experience score, and contextual similarity. Technical and soft scores are based on coverage of required skills. Experience is capped so that over-qualified candidates do not receive more than the maximum allotted experience weight. Contextual similarity is implemented as a selectable component. The basic mode uses TF-IDF vectors and cosine similarity for speed and auditability, while the advanced mode uses MiniLM sentence embeddings for semantic comparison. In both modes, the symbolic skill and experience components remain unchanged.
 
 \subsection{Explainable AI Layer}
 The explanation layer receives the internal score dictionary and converts it into plain-language justification. Rather than post-hoc approximating a black-box model, it directly reports the exact symbolic components used in scoring. This produces statements listing matched required skills, missing skills, detected extra skills, experience fit, and score contribution by component.
@@ -40,7 +40,7 @@ OCR fallback & Image $\rightarrow$ recovered text & Applies preprocessing and OC
 \hline
 NLP extractor & Normalized text $\rightarrow$ attributes & SpaCy pipeline; detects skills and experience via curated dictionaries and regex.\\
 \hline
-Matching engine & Attributes $\rightarrow$ score dict & Computes tech, soft, experience, TF-IDF context, bonus, and final scores.\\
+Matching engine & Attributes $\rightarrow$ score dict & Computes tech, soft, experience, selectable context similarity, bonus, and final scores.\\
 \hline
 XAI generator & Score dict $\rightarrow$ explanation & Produces plain-English explanations with matched, missing, and extra skills.\\
 \hline

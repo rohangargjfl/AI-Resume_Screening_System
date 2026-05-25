@@ -33,45 +33,27 @@
 
 \pagestyle{empty}
 
-\titleformat{\section}{\centering\normalsize\bfseries}{\Roman{section}.}{0.5em}{\MakeUppercase}
+% --- SECTION HEADING FORMATTING ---
+% Removed \MakeUppercase to allow standard Title Case headings
+\titleformat{\section}{\centering\normalsize\bfseries}{\Roman{section}.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\itshape}{\Alph{subsection}.}{0.5em}{}
 \titleformat{\subsubsection}{\normalsize\itshape}{\arabic{subsubsection})}{0.5em}{}
 \titlespacing*{\section}{0pt}{8pt}{4pt}
 \titlespacing*{\subsection}{0pt}{6pt}{2pt}
 \titlespacing*{\subsubsection}{0pt}{4pt}{1pt}
 
-\renewcommand{\thetable}{\Roman{table}}
-\renewcommand{\tablename}{TABLE}
+% --- CAPTION FORMATTING ---
+% Configured to match IJRESM standards (Arabic numerals, two-line table captions)
+\renewcommand{\thetable}{\arabic{table}}
+\renewcommand{\tablename}{Table}
 \DeclareCaptionLabelFormat{ijresmfig}{Fig. #2}
-\captionsetup[table]{font=footnotesize,labelfont=sc,textfont=it,justification=centering,labelsep=colon,skip=3pt}
-\captionsetup[figure]{font=footnotesize,labelfont=bf,justification=centering,labelformat=ijresmfig,labelsep=period,skip=3pt}
+\captionsetup[table]{font=footnotesize, justification=centering, labelsep=newline, skip=3pt}
+\captionsetup[figure]{font=footnotesize, justification=centering, labelformat=ijresmfig, labelsep=period, skip=3pt}
 \arrayrulecolor{black}
 
+% --- CUSTOM ENVIRONMENTS ---
 \newenvironment{ijresmabstract}
 {\par\noindent\fontsize{9}{11}\selectfont\textbf{\textit{Abstract---}}\ \bfseries}
 {\par\vspace{4pt}}
 
 \newcommand{\ijresmkeywords}[1]{\par\noindent\fontsize{9}{11}\selectfont\textbf{\textit{Keywords---}} {\bfseries #1}\par\vspace{8pt}}
-\newcommand{\authorname}[1]{{\fontsize{11}{13}\selectfont #1}}
-\newcommand{\affiliationline}[1]{{\fontsize{8}{9}\itshape\selectfont #1}}
-\newcommand{\plainauthorline}[1]{{\fontsize{8}{9}\selectfont #1}}
-\newcommand{\guideblock}{%
-\begin{tabular}{@{}c@{}}
-\authorname{Mrs. Gull Kaur*}\\
-\affiliationline{Assistant Professor}\\
-\affiliationline{Dept. of Computer Science \& Engg.}\\
-\affiliationline{Delhi Technological University}\\
-\affiliationline{New Delhi, India}
-\end{tabular}
-}
-\newcommand{\studentblock}[2]{%
-\begin{tabular}{@{}c@{}}
-\authorname{#1}\\
-\plainauthorline{#2}\\
-\affiliationline{Dept. of Computer Science \&}\\
-\affiliationline{Engg.}\\
-\affiliationline{Delhi Technological University}\\
-\affiliationline{New Delhi, India}
-\end{tabular}
-}
-

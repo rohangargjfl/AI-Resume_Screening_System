@@ -11,7 +11,7 @@ The complete workflow is shown in Algorithm~\ref{alg:endtoend}. This algorithm i
 \hrule
 \vspace{4pt}
 \begin{enumerate}
-    \item \textbf{Input:} Resume batch \(R\), job description \(J\), scoring weights \(W=(W_t,W_s,W_e,W_c)\), bonus cap \(B_{max}\).
+    \item \textbf{Input:} Resume batch \(R\), job description \(J\), scoring weights \(W=(W_t,W_s,W_e,W_c)\), bonus cap \(B_{max}\), and context mode \(M \in \{\text{TF-IDF},\text{MiniLM}\}\).
     \item Parse \(J\) and extract required technical skills, soft skills, and required experience.
     \item For each resume \(r_i \in R\):
     \begin{enumerate}
@@ -21,7 +21,7 @@ The complete workflow is shown in Algorithm~\ref{alg:endtoend}. This algorithm i
         \item If the file is an image, apply OCR using the available OCR provider; if Tesseract fallback is required, flatten transparency, convert to grayscale, boost contrast, sharpen, binarize, and run OCR.
         \item Normalize extracted text by lowercasing, removing noisy tokens, and standardizing spacing.
         \item Extract candidate technical skills, soft skills, and years of experience using skill ontology and regular expressions.
-        \item Compute technical coverage, soft-skill coverage, capped experience match, and TF-IDF cosine similarity.
+        \item Compute technical coverage, soft-skill coverage, capped experience match, and contextual similarity using the selected context mode \(M\).
         \item Compute capped extra-skill bonus from skills present in resume but absent in the job description.
         \item Calculate final weighted score \(S_i\).
         \item Generate explanation \(E_i\) from matched, missing, bonus, and score-breakdown fields.
@@ -56,11 +56,11 @@ S_{exp}=\min\left(\frac{Y_R}{Y_J},1.0\right)\times 100.
 The cap prevents a candidate with double the required experience from receiving a mathematically inflated 200\% experience score.
 
 \subsection{Contextual Similarity}
-The system uses TF-IDF vectorization to represent the resume and job description as vectors. The primary implementation uses scikit-learn's \texttt{TfidfVectorizer} with English stop-word removal, a maximum vocabulary size of 5000, and unigram-plus-bigram features \((1,2)\). The bi-gram setting captures short technical phrases such as ``machine learning'' without loading a neural embedding model. Let \(A\) be the resume vector and \(B\) be the job-description vector. Their contextual similarity is computed by cosine similarity:
+The system supports two context-similarity modes. The default mode uses TF-IDF vectorization to represent the resume and job description as sparse vectors. The implementation uses scikit-learn's \texttt{TfidfVectorizer} with English stop-word removal, a maximum vocabulary size of 5000, and unigram-plus-bigram features \((1,2)\). The bi-gram setting captures short technical phrases such as ``machine learning'' without loading a neural embedding model. The advanced mode keeps the same rule-based skill extraction and scoring formula but replaces the context vector with an \texttt{all-MiniLM-L6-v2} sentence embedding. Let \(A\) be the resume context vector and \(B\) be the job-description context vector under the selected mode. Their contextual similarity is computed by cosine similarity:
 \begin{equation}
 S_{ctx}=\frac{A \cdot B}{\|A\|\|B\|}\times 100.
 \end{equation}
-TF-IDF rewards distinctive terms more strongly than generic words. In combination with cosine normalization, it reduces the benefit of simply making a resume longer or repeatedly inserting a subset of terms, which is useful for resisting simple keyword-stuffing attacks.
+TF-IDF rewards distinctive terms more strongly than generic words. In combination with cosine normalization, it reduces the benefit of simply making a resume longer or repeatedly inserting a subset of terms, which is useful for resisting simple keyword-stuffing attacks. MiniLM provides better handling of synonymous phrasing such as ``RESTful services'' and ``REST APIs'', but it requires additional model loading and inference time. The two modes therefore expose a practical trade-off rather than changing the bounded scoring model itself.
 
 \subsection{Bounded Weighted Score}
 Recruiters may tune component weights before analysis. The default configuration used in the prototype is:

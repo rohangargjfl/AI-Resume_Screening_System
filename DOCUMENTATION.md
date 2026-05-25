@@ -138,16 +138,17 @@ pattern = r'\b' + re.escape(skill) + r'\b'
 
 ---
 
-## 5. Feature Extraction (TF-IDF Vectorization)
+## 5. Feature Extraction and Context Similarity
 
 Found in `feature_extraction/extractor.py`. The `FeatureExtractor` class wraps `scikit-learn`'s `TfidfVectorizer`.
 
-### Primary Vectorizer (used in matching)
+### Basic Mode Vectorizer (default context engine)
 ```python
 TfidfVectorizer(max_features=5000, stop_words='english', ngram_range=(1, 2))
 ```
 - **Bi-grams** (`ngram_range=(1,2)`) — Captures two-word phrases like `"machine learning"` as a single feature, simulating semantic understanding without a neural network.
 - **`max_features=5000`** — Caps the vocabulary to prevent memory overuse.
+- **Used when:** the Upload Dashboard context mode is set to **Basic TF-IDF**. This remains the default because it is fast, transparent, and suitable for low-resource first-pass filtering.
 
 ### Secondary Vectorizer (semantic embeddings)
 ```python
@@ -158,13 +159,37 @@ TfidfVectorizer(max_features=8000, stop_words='english', ngram_range=(1, 3), sub
 
 > **Note:** The primary `(1,2)` vectorizer is what's actually called in `matcher.py`. The `(1,3)` vectorizer is available as `sentence_embeddings()` for future use.
 
+### Advanced Mode Semantic Context Engine
+
+Found in `matching_engine/matcher.py`. The prototype now exposes an optional **Advanced MiniLM** mode for the context-similarity component only.
+
+```python
+AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+```
+
+How it works:
+- The strict regex-based skill extraction remains unchanged.
+- Only the `text_sim × W_context` component is switched from sparse TF-IDF cosine similarity to dense MiniLM embedding cosine similarity.
+- The transformer model is lazy-loaded only when the recruiter selects **Advanced MiniLM** in the UI.
+- Mean pooling over token embeddings creates one vector per document, and cosine similarity compares the JD vector with each resume vector.
+- If MiniLM cannot be loaded, the system safely falls back to Basic TF-IDF and displays a warning on the results page.
+
+This gives the live prototype both benchmarked behaviours:
+- **Model A / Basic Mode:** Regex + TF-IDF, fastest and most explainable.
+- **Model B / Advanced Mode:** Regex + MiniLM context, better semantic understanding while preserving hard-skill boundaries.
+
 ---
 
 ## 6. The Matching & Scoring Engine
 
 Found in `matching_engine/matcher.py`. This is the core AI scoring layer.
 
-The system does **NOT** use heavy LLMs (GPT, BERT, etc.). It uses fast statistical machine learning via `scikit-learn`.
+The system preserves the lightweight scoring formula but now allows the recruiter to choose the context similarity engine:
+- **Basic TF-IDF Cosine:** default, fast lexical similarity via `scikit-learn`.
+- **Advanced MiniLM Semantic:** optional dense semantic similarity via `sentence-transformers/all-MiniLM-L6-v2` using the already installed `transformers` and `torch` stack.
+
+The explicit technical-skill, soft-skill, experience, and bonus components remain identical in both modes.
 
 ### The Final Weighted Score Formula
 
@@ -185,7 +210,7 @@ These are configured in real-time by the recruiter via sliders on the Upload Das
 | **Tech Score** | Set Intersection | `len(matched_tech) / len(required_tech)` |
 | **Soft Score** | Set Intersection | `len(matched_soft) / len(required_soft)` |
 | **YoE Score** | Linear Ratio | `min(resume_yoe / jd_yoe, 1.0)` — capped at 1.0 (no inflation for over-qualified) |
-| **Context Score** | TF-IDF Cosine Similarity | Geometric angle between JD and Resume TF-IDF vectors |
+| **Context Score** | Basic TF-IDF or Advanced MiniLM Cosine Similarity | Geometric angle between JD and Resume vectors |
 | **Extra Skills Bonus** | Additive offset | `min(len(extra_tech) × (bonus_weight / 10), bonus_weight)` |
 
 ### Cosine Similarity — Why Not Euclidean Distance?
@@ -206,6 +231,9 @@ A 5-page resume and a 1-page resume may be far apart in raw length (Euclidean di
     'extra_skills_bonus': float,    # Extra bonus points for unrequested skills
     'jd_yoe': int,                  # Required YoE from JD
     'resume_yoe': int,              # Detected YoE from resume
+    'context_model': str,           # tfidf, minilm, or tfidf_fallback
+    'context_model_label': str,     # Human-readable context engine name
+    'context_model_warning': str,   # Warning if Advanced mode fell back
 }
 ```
 
@@ -260,6 +288,7 @@ Found in `visualization/charts.py`. The `Visualizer` class generates **3 matplot
 The most complex UI component. Key elements:
 
 - **5 HTML5 Range Sliders:** `weight_tech`, `weight_yoe`, `weight_context`, `weight_soft`, `weight_bonus`.
+- **Context Similarity Mode Selector:** `context_mode=tfidf|minilm`, exposed as Basic TF-IDF and Advanced MiniLM buttons.
 - **`normalizeSliders()` JS engine:** The first 4 sliders share a strictly bound `100%` pool. When any slider moves, the JS redistributes the remaining budget proportionally among the others — the total NEVER breaches `100%`.
 - **Bonus Slider Isolation:** `weight_bonus` is explicitly isolated from the 100% pool — it's an additive offset variable, not part of the normalization math.
 - **Quick Presets:** A JS dictionary maps 4 preset keys (`default`, `strict`, `balanced`, `soft`) to slider values. Pressing a preset button updates all sliders and triggers `updateBadges()`.
@@ -272,7 +301,7 @@ An intermediate page shown after upload. It:
 4. On `status === 'done'`, redirects to `/results`.
 
 ### `results.html` — The Output Dashboard
-Fully server-rendered via Jinja2 with `explanations`, `score_chart`, `skill_chart`, `soft_chart`, and `jd_skills` passed directly from `routes.py`. No client-side data fetching needed.
+Fully server-rendered via Jinja2 with `explanations`, `score_chart`, `skill_chart`, `soft_chart`, `jd_skills`, `custom_weights`, and the active `context_model_label` passed directly from `routes.py`. No client-side data fetching needed.
 
 ---
 
@@ -295,7 +324,7 @@ GET  /results → render results from _job_store[job_id]['results']
 ```
 
 **Key Design Decisions:**
-- **`_data_store` (dict):** Stores uploaded file text and weights server-side by a UUID key, avoiding cookie size limits (cookies only store the UUID key).
+- **`_data_store` (dict):** Stores uploaded file text, weights, and selected context mode server-side by a UUID key, avoiding cookie size limits (cookies only store the UUID key).
 - **`_job_store` (dict):** Stores background job state (`queued → loading_models → processing_jd → processing_resumes → computing_scores → generating_explanations → creating_charts → done`).
 - **Lazy Singletons:** Heavy modules (`NLPProcessor`, `MatchingEngine`, `Visualizer`, `Explainer`) are initialized only on first use (`_get_nlp_processor()`, etc.) to keep app startup fast.
 - **`daemon=True` Thread:** The background thread is a daemon so it won't block Flask shutdown.
@@ -360,10 +389,12 @@ If you are an AI or developer reading this file to assist with this codebase, yo
 
 2.  **Do NOT alter `upload.html` sliders without mapping `routes.py`.** If you add a new weight slider, you must: isolate its DOM ID, update `normalizeSliders()`, update the Quick Presets dictionary, extract it via `request.form.get()` in `routes.py`, and pass it into `matcher.py`'s weights dict.
 
-3.  **Do NOT add heavy ML dependencies.** This project deliberately uses `scikit-learn` TF-IDF + Cosine Similarity instead of HuggingFace `sentence-transformers`. Do NOT install PyTorch, TensorFlow, or Transformers unless the user explicitly requests a migration to dense neural embeddings.
+3.  **Do NOT replace the default Basic mode.** TF-IDF must remain the default context engine because it is the low-resource prototype baseline. Advanced MiniLM is optional and must only affect the context-similarity component.
 
 4.  **Do NOT block the main Flask thread.** All AI processing MUST occur inside `_run_analysis()` in `routes.py` as a daemon thread, updating `_job_store[job_id]` incrementally. Synchronous analysis will lock the Flask worker.
 
 5.  **Do NOT use `ngram_range=(1,3)` in the primary matching vectorizer.** The `sentence_embeddings()` method uses tri-grams, but `tfidf_vectors()` (used in actual matching) uses bi-grams `(1,2)` for speed. Mixing these will produce incorrect cosine similarity results.
 
 6.  **Do NOT hard-code weights.** The `weights` dict is always passed dynamically from the user's slider configuration. Default values exist only as a fallback when `weights=None`.
+
+7.  **Do NOT make MiniLM mandatory for app startup.** It must remain lazy-loaded inside the matching engine so login, upload, and Basic TF-IDF mode continue to work even on systems without the model cache.
