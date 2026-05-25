@@ -27,7 +27,7 @@ Frontend & Bootstrap, Jinja2, JavaScript, Matplotlib Base64 charts, and Chart.js
 \end{table}
 
 \subsection{Backend Flow}
-When a recruiter uploads resumes and a job description, the backend stores uploaded content and weight settings server-side under a UUID key. Each resume is processed through the parser, NLP extractor, matching engine, and explanation layer. Results are returned as structured objects containing candidate name, score components, matched skills, missing skills, bonus skills, detected soft skills, and generated explanation text. The separation of concerns keeps the parser, matcher, and explainer independently testable.
+When a recruiter uploads resumes and a job description, the backend stores uploaded content and weight settings server-side under a UUID key. Each resume is processed through the parser, NLP extractor, matching engine, and explanation layer. Results are returned as structured objects containing candidate name, score components, matched JD skills, missing JD skills, matched years-of-experience ratio, bonus technical skills, bonus soft skills, and generated explanation text. The separation of concerns keeps the parser, matcher, and explainer independently testable.
 
 \subsection{Concurrency and User Experience}
 Batch screening can create long-running requests if all files are processed synchronously. The prototype therefore starts a daemon background thread and lets the analysis page poll a status endpoint while processing continues. The recruiter configures weights, uploads documents, waits for completion, and then reviews ranked results with score explanations. This supports quick triage while preserving transparency.
@@ -43,7 +43,7 @@ The frontend provides controls for tuning the scoring weights before the run. Fo
 \end{figure}
 
 \subsection{Explainable Output}
-The result dashboard does not expose only a single final score. It decomposes the score into technical skills, soft skills, experience, context match, and bonus contribution. The expanded explanation panel lists matched and missing job-description skills, which makes the score traceable. Fig.~\ref{fig:xai} shows the explainable score breakdown interface.
+The result dashboard does not expose only a single final score. It decomposes the score into technical skills, soft skills, experience, context match, and bonus contribution. The expanded explanation panel lists matched and missing job-description skills, including required soft skills, while non-required soft skills detected in the candidate profile are shown in a separate bonus-soft-skills group. A matched-years-of-experience field displays the extracted candidate experience against the JD requirement, such as \(0.5/2\) years. This separation makes the score traceable without visually counting the same soft skill twice. Fig.~\ref{fig:xai} shows the explainable score breakdown interface.
 
 \begin{figure}[!ht]
     \centering

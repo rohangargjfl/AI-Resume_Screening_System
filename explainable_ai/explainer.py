@@ -9,6 +9,12 @@ class Explainer:
     """Generate explainable reports for candidate–JD matches."""
 
     @staticmethod
+    def _format_years(value: float | int) -> str:
+        """Format years without noisy trailing zeros."""
+        value = float(value or 0)
+        return str(int(value)) if value.is_integer() else f"{value:.2f}".rstrip("0").rstrip(".")
+
+    @staticmethod
     def explain(
         candidate_name: str,
         match_score: float,
@@ -29,28 +35,37 @@ class Explainer:
         jd_soft_set = set(jd_soft_skills)
         resume_soft_set = set(resume_soft_skills)
 
-        matched_skills = sorted(resume_tech_set & jd_tech_set)
-        missing_skills = sorted(jd_tech_set - resume_tech_set)
+        matched_tech = sorted(resume_tech_set & jd_tech_set)
+        missing_tech = sorted(jd_tech_set - resume_tech_set)
         extra_skills = sorted(resume_tech_set - jd_tech_set)
         matched_soft = sorted(resume_soft_set & jd_soft_set)
         missing_soft = sorted(jd_soft_set - resume_soft_set)
+        extra_soft = sorted(resume_soft_set - jd_soft_set)
+
+        matched_jd_skills = sorted(set(matched_tech) | set(matched_soft))
+        missing_jd_skills = sorted(set(missing_tech) | set(missing_soft))
+        total_required_skills = len(jd_tech_set) + len(jd_soft_set)
 
         skill_match_ratio = (
-            round(len(matched_skills) / len(jd_tech_set) * 100, 1)
-            if jd_tech_set else 0.0
+            round(len(matched_jd_skills) / total_required_skills * 100, 1)
+            if total_required_skills else 0.0
         )
 
         # Build the explanation dict
         result = {
             'candidate_name': candidate_name,
             'match_score': round(match_score, 2),
-            'matched_skills': matched_skills,
-            'missing_skills': missing_skills,
+            'matched_skills': matched_jd_skills,
+            'missing_skills': missing_jd_skills,
+            'matched_technical_skills': matched_tech,
+            'missing_technical_skills': missing_tech,
             'extra_skills': extra_skills,
             'detected_soft_skills': sorted(resume_soft_set),
             'matched_soft_skills': matched_soft,
             'missing_soft_skills': missing_soft,
-            'total_jd_skills': len(jd_tech_set),
+            'extra_soft_skills': extra_soft,
+            'total_jd_skills': total_required_skills,
+            'total_jd_technical_skills': len(jd_tech_set),
             'total_jd_soft_skills': len(jd_soft_set),
             'skill_match_ratio': skill_match_ratio,
             'total_resume_skills': len(resume_tech_set),
@@ -61,8 +76,9 @@ class Explainer:
             result['breakdown'] = score_breakdown
             result['explanation'] = Explainer._build_explanation(
                 candidate_name, match_score, score_breakdown,
-                matched_skills, missing_skills, jd_tech_set,
-                matched_soft, resume_soft_set, extra_skills,
+                matched_tech, missing_tech, jd_tech_set,
+                matched_soft, missing_soft, resume_soft_set,
+                extra_skills, extra_soft,
             )
 
         return result
@@ -71,7 +87,8 @@ class Explainer:
     def _build_explanation(
         name, score, breakdown,
         matched_skills, missing_skills, jd_tech_set,
-        matched_soft, resume_soft_set, extra_skills,
+        matched_soft, missing_soft, resume_soft_set,
+        extra_skills, extra_soft,
     ) -> str:
         """Generate a human-readable paragraph explaining the ranking."""
         lines = []
@@ -90,10 +107,12 @@ class Explainer:
         jd_yoe = breakdown.get('jd_yoe', 0)
         resume_yoe = breakdown.get('resume_yoe', 0)
         if jd_yoe > 0:
+            resume_yoe_text = Explainer._format_years(resume_yoe)
+            jd_yoe_text = Explainer._format_years(jd_yoe)
             if resume_yoe >= jd_yoe:
-                lines.append(f"Meets experience requirement ({resume_yoe} yrs / {jd_yoe} yrs requested).")
+                lines.append(f"Meets experience requirement ({resume_yoe_text} yrs / {jd_yoe_text} yrs requested).")
             else:
-                lines.append(f"Falls short on experience ({resume_yoe} yrs / {jd_yoe} yrs requested).")
+                lines.append(f"Falls short on experience ({resume_yoe_text} yrs / {jd_yoe_text} yrs requested).")
         
         # Technical skills
         tech_pct = breakdown.get('tech_skill_score', 0)
@@ -121,7 +140,17 @@ class Explainer:
         
         # Soft skills
         if matched_soft:
-            lines.append(f"Soft skills matched: {', '.join(matched_soft)}.")
+            lines.append(f"Required soft skills matched: {', '.join(matched_soft)}.")
+        if missing_soft:
+            lines.append(
+                f"Missing required soft skills: {', '.join(missing_soft[:6])}"
+                f"{'...' if len(missing_soft) > 6 else ''}."
+            )
+        if extra_soft:
+            lines.append(
+                f"Additional soft skills not requested in JD: {', '.join(extra_soft[:5])}"
+                f"{'...' if len(extra_soft) > 5 else ''}."
+            )
         if resume_soft_set:
             soft_pct = breakdown.get('soft_skill_score', 0)
             lines.append(f"Soft skill match: {soft_pct:.0f}%.")

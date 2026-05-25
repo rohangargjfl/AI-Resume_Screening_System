@@ -95,25 +95,36 @@ class NLPProcessor:
         return found
 
     @staticmethod
-    def _extract_years_of_experience(text: str) -> int:
+    def _extract_years_of_experience(text: str) -> float:
         """Extract max years of experience from text using regex or date math."""
         import datetime
         text_lower = text.lower()
         
-        # Primary pattern: "5+ years of experience", "3 yrs exp"
-        pattern1 = r'\b(\d{1,2})(?:\+)?\s*(?:years?|yrs?)\s*(?:of)?\s*(?:experience|exp)\b'
+        # Primary pattern: "5+ years of experience", "3 yrs exp", "0.5 years experience"
+        pattern1 = r'\b(\d{1,2}(?:\.\d+)?)(?:\+)?\s*(?:years?|yrs?)\s*(?:of)?\s*(?:experience|exp)\b'
         matches = re.findall(pattern1, text_lower)
         
         if not matches:
             # Secondary pattern: "Experience: 5+ years"
-            pattern2 = r'\b(?:experience|exp)\b.{0,30}?\b(\d{1,2})(?:\+)?\s*(?:years?|yrs?)\b'
+            pattern2 = r'\b(?:experience|exp)\b.{0,30}?\b(\d{1,2}(?:\.\d+)?)(?:\+)?\s*(?:years?|yrs?)\b'
             matches = re.findall(pattern2, text_lower)
             
         if matches:
             # Filter out wildly high numbers (e.g. > 40)
-            valid_years = [int(m) for m in matches if int(m) <= 40]
+            valid_years = [float(m) for m in matches if float(m) <= 40]
             if valid_years:
                 return max(valid_years)
+
+        # Month-level explicit pattern: "6 months experience", "Experience: 6 months"
+        month_patterns = [
+            r'\b(\d{1,2})(?:\+)?\s*(?:months?|mos?)\s*(?:of)?\s*(?:experience|exp)\b',
+            r'\b(?:experience|exp)\b.{0,30}?\b(\d{1,2})(?:\+)?\s*(?:months?|mos?)\b',
+        ]
+        month_values = []
+        for pattern in month_patterns:
+            month_values.extend(int(m) for m in re.findall(pattern, text_lower) if int(m) <= 480)
+        if month_values:
+            return round(max(month_values) / 12.0, 2)
                 
         # Fallback: Date Math Parser (e.g. "June 2024 - August 2025" which becomes "june 2024 august 2025" after punctuation strip)
         months = r'(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)'
@@ -159,14 +170,10 @@ class NLPProcessor:
             if end_year > start_year:
                 total_years_from_years += (end_year - start_year)
                 
-        calculated_years = max(total_months // 12, total_years_from_years)
-        
-        # For junior developers with active internships (e.g. 14 months = 1 year, 6 months = 1 year rounded)
-        if calculated_years == 0 and total_months >= 6:
-            calculated_years = 1
+        calculated_years = max(round(total_months / 12.0, 2), float(total_years_from_years))
             
         # Prevent education inflation (most BTechs add 4 years) by arbitrarily capping at a realistic fallback if No explicit YoE was declared
         if calculated_years > 5:  
-            calculated_years = 0 
+            calculated_years = 0.0 
             
         return calculated_years

@@ -87,7 +87,7 @@
                             <th>Candidate</th>
                             <th>Match Score</th>
                             <th>Skills Match</th>
-                            <th>Soft Skills</th>
+                            <th>Bonus Soft</th>
                             <th>Details</th>
                         </tr>
                     </thead>
@@ -114,7 +114,7 @@
                             </td>
                             <td>
                                 <span class="badge bg-info-subtle text-info-emphasis">
-                                    {{ exp.detected_soft_skills|length }} detected
+                                    {{ exp.extra_soft_skills|length }} extra
                                 </span>
                             </td>
                             <td>
@@ -166,7 +166,7 @@
                                         </div>
                                     </div>
                                     <div class="row g-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md">
                                             <h6 class="text-success"><i class="bi bi-check-circle"></i> Matched JD Skills</h6>
                                             <div class="skill-tags">
                                                 {% for skill in exp.matched_skills %}
@@ -177,7 +177,7 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md">
                                             <h6 class="text-danger"><i class="bi bi-x-circle"></i> Missing JD Skills</h6>
                                             <div class="skill-tags">
                                                 {% for skill in exp.missing_skills %}
@@ -188,7 +188,17 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md">
+                                            <h6 class="text-secondary"><i class="bi bi-calendar-check"></i> Matched YoE</h6>
+                                            <div class="skill-tags">
+                                                {% if exp.breakdown.jd_yoe > 0 %}
+                                                    <span class="skill-tag skill-soft">{{ exp.breakdown.yoe_match_display }} yrs</span>
+                                                {% else %}
+                                                    <span class="text-muted">Not required</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
                                             <h6 class="text-primary"><i class="bi bi-plus-circle"></i> Bonus Tech Skills</h6>
                                             <div class="skill-tags">
                                                 {% for skill in exp.extra_skills %}
@@ -199,14 +209,14 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <h6 class="text-info"><i class="bi bi-heart"></i> Soft Skills</h6>
+                                        <div class="col-md">
+                                            <h6 class="text-info"><i class="bi bi-heart"></i> Bonus Soft Skills</h6>
                                             <div class="skill-tags">
-                                                {% for skill in exp.detected_soft_skills %}
+                                                {% for skill in exp.extra_soft_skills %}
                                                     <span class="skill-tag skill-soft">{{ skill }}</span>
                                                 {% endfor %}
-                                                {% if not exp.detected_soft_skills %}
-                                                    <span class="text-muted">None detected</span>
+                                                {% if not exp.extra_soft_skills %}
+                                                    <span class="text-muted">None extra</span>
                                                 {% endif %}
                                             </div>
                                         </div>

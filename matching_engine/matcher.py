@@ -46,6 +46,12 @@ class MatchingEngine:
         matched = req_set.intersection(found_set)
         return len(matched) / len(req_set)
 
+    @staticmethod
+    def _format_years(value: float | int) -> str:
+        """Format years without noisy trailing zeros."""
+        value = float(value or 0)
+        return str(int(value)) if value.is_integer() else f"{value:.2f}".rstrip("0").rstrip(".")
+
     def _normalise_context_mode(self, context_mode: str | None) -> str:
         """Return a supported context similarity mode."""
         if not context_mode:
@@ -151,7 +157,7 @@ class MatchingEngine:
         jd_tech_skills: list[str],
         jd_soft_skills: list[str],
         resumes: list[dict],
-        jd_yoe: int = 0,
+        jd_yoe: float = 0,
         weights: dict = None,
         context_mode: str = "tfidf",
     ) -> list[float]:
@@ -202,7 +208,7 @@ class MatchingEngine:
         jd_tech_skills: list[str],
         jd_soft_skills: list[str],
         resumes: list[dict],
-        jd_yoe: int = 0,
+        jd_yoe: float = 0,
         weights: dict = None,
         context_mode: str = "tfidf",
     ) -> list[dict]:
@@ -268,6 +274,10 @@ class MatchingEngine:
                 'extra_skills_bonus': round(extra_bonus * 100, 1),
                 'jd_yoe': jd_yoe,
                 'resume_yoe': resume_yoe,
+                'yoe_match_display': (
+                    f"{self._format_years(resume_yoe)}/{self._format_years(jd_yoe)}"
+                    if jd_yoe > 0 else f"{self._format_years(resume_yoe)}/N/A"
+                ),
                 **context_meta,
             })
 

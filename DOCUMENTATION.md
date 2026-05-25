@@ -114,7 +114,7 @@ Found in `nlp_processing/processor.py`. The NLP engine runs on every uploaded do
     'entities': [{'text': ..., 'label': ...}],  # NER entities (ORG, DATE, etc.)
     'technical_skills': [...],    # Skills matched against TECHNICAL_SKILLS database
     'soft_skills': [...],         # Skills matched against SOFT_SKILLS database
-    'years_of_experience': int,   # Extracted integer YoE
+    'years_of_experience': float, # Extracted YoE, supports decimals such as 0.5
 }
 ```
 
@@ -125,16 +125,17 @@ pattern = r'\b' + re.escape(skill) + r'\b'
 ```
 **Why not SpaCy NER for skills?** Strict `\b` regex guarantees 100% precision — `c` will NOT match inside `communication`. SpaCy NER is used for contextual entities (organizations, dates) but NOT for skill extraction.
 
-### Years of Experience (YoE) Extraction — 3-tier cascade
+### Years of Experience (YoE) Extraction — 4-tier cascade
 
-1.  **Primary Pattern** — Explicit declarations like `"5+ years of experience"`, `"3 yrs exp"`.
+1.  **Primary Pattern** — Explicit declarations like `"5+ years of experience"`, `"3 yrs exp"`, or `"0.5 years experience"`.
 2.  **Secondary Pattern** — Reversed declarations like `"Experience: 5+ years"`.
-3.  **Date Math Fallback** — Scans for chronological date ranges (e.g., `"June 2024 - August 2025"`), converts them to `datetime` objects, calculates the month spread, and returns `total_months // 12`. Supports both `Month Year` and `Year-only` formats. Also handles `"present"` / `"current"` end dates.
+3.  **Month Pattern** — Short experience statements such as `"6 months experience"` are converted to decimal years (`0.5`).
+4.  **Date Math Fallback** — Scans for chronological date ranges (e.g., `"June 2024 - August 2025"`), converts them to `datetime` objects, calculates the month spread, and returns decimal years (`total_months / 12`). Supports both `Month Year` and `Year-only` formats. Also handles `"present"` / `"current"` end dates.
 
 **Edge Case Handling:**
 - Values > 40 years are filtered as invalid.
 - Date-math totals > 5 years are reset to `0` to prevent **education inflation** (a 4-year BTech would otherwise count as 4 years of work experience).
-- If date math yields 0 years but ≥ 6 months are found, it returns `1` (for active interns/juniors).
+- Month-level experience is preserved as decimal years, so 6 months is represented as `0.5` rather than rounded to `1`.
 
 ---
 
@@ -229,8 +230,9 @@ A 5-page resume and a 1-page resume may be far apart in raw length (Euclidean di
     'yoe_contribution': float,      # Points contributed by YoE
     'text_contribution': float,     # Points contributed by context match
     'extra_skills_bonus': float,    # Extra bonus points for unrequested skills
-    'jd_yoe': int,                  # Required YoE from JD
-    'resume_yoe': int,              # Detected YoE from resume
+    'jd_yoe': float,                # Required YoE from JD
+    'resume_yoe': float,            # Detected YoE from resume
+    'yoe_match_display': str,       # Display ratio, e.g. "0.5/2"
     'context_model': str,           # tfidf, minilm, or tfidf_fallback
     'context_model_label': str,     # Human-readable context engine name
     'context_model_warning': str,   # Warning if Advanced mode fell back
@@ -256,17 +258,22 @@ The explanation classifies candidates into 4 buckets: **Strong (≥75%)**, **Mod
 {
     'candidate_name': str,
     'match_score': float,
-    'matched_skills': [...],
-    'missing_skills': [...],
-    'extra_skills': [...],            # Skills in resume but NOT required by JD
-    'detected_soft_skills': [...],
+    'matched_skills': [...],          # Matched JD technical + soft skills
+    'missing_skills': [...],          # Missing JD technical + soft skills
+    'matched_technical_skills': [...],
+    'missing_technical_skills': [...],
+    'extra_skills': [...],            # Technical skills in resume but NOT required by JD
+    'detected_soft_skills': [...],    # All soft skills detected in the resume
     'matched_soft_skills': [...],
     'missing_soft_skills': [...],
-    'skill_match_ratio': float,       # % of JD tech skills matched
+    'extra_soft_skills': [...],       # Soft skills in resume but NOT required by JD
+    'skill_match_ratio': float,       # % of JD tech + soft skills matched
     'breakdown': {...},               # Full score_details dict from matcher
     'explanation': str,               # Human-readable paragraph
 }
 ```
+
+In the results dashboard, required technical skills and required soft skills are treated as JD requirements. Therefore, matched required soft skills appear under **Matched JD Skills**, missing required soft skills appear under **Missing JD Skills**, and the **Bonus Soft Skills** panel shows only additional candidate soft skills that were not requested by the JD. A separate **Matched YoE** panel shows the extracted candidate experience against the JD requirement, for example `0.5/2 yrs`. This prevents the same soft skill from being counted in two visual buckets while making the experience ratio visible.
 
 ---
 
