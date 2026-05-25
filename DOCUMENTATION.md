@@ -198,7 +198,9 @@ The explicit technical-skill, soft-skill, experience, and bonus components remai
 Final Score = (tech_score × W_tech) + (soft_score × W_soft) + (yoe_score × W_yoe) + (text_sim × W_context) + extra_bonus
 ```
 
-All weights `W_tech + W_soft + W_yoe + W_context` must always sum to `1.0`. The bonus is an additive offset, capped separately.
+All weights `W_tech + W_soft + W_yoe + W_context` must always sum to `1.0`. The bonus is an additive offset, capped separately. It is computed from extra technical skills and extra soft skills that are present in the resume but not requested by the JD, with both sharing the same bonus cap so that extra evidence cannot overpower missing requirements.
+
+If the JD does not specify a component, that component receives full base credit instead of penalizing the candidate with a zero denominator. For example, no required soft skills means `soft_score = 1.0`, and no required years of experience means `yoe_score = 1.0`.
 
 **Default weights:** `Tech=60%, YoE=15%, Context=15%, Soft=10%, Bonus cap=5%`
 
@@ -273,7 +275,7 @@ The explanation classifies candidates into 4 buckets: **Strong (≥75%)**, **Mod
 }
 ```
 
-In the results dashboard, required technical skills and required soft skills are treated as JD requirements. Therefore, matched required soft skills appear under **Matched JD Skills**, missing required soft skills appear under **Missing JD Skills**, and the **Bonus Soft Skills** panel shows only additional candidate soft skills that were not requested by the JD. A separate **Matched YoE** panel shows the extracted candidate experience against the JD requirement, for example `0.5/2 yrs`. This prevents the same soft skill from being counted in two visual buckets while making the experience ratio visible.
+In the results dashboard, required technical skills and required soft skills are treated as JD requirements. Therefore, matched required soft skills appear under **Matched JD Skills**, missing required soft skills appear under **Missing JD Skills**, and the **Required Skills (from JD)** reference panel is the union of required technical and soft skills. The **Bonus Soft Skills** panel shows only additional candidate soft skills that were not requested by the JD. A separate **Matched YoE** panel shows the extracted candidate experience against the JD requirement, for example `0.5/2 yrs`. This prevents the same soft skill from being counted in two visual buckets while making the experience ratio visible.
 
 ---
 

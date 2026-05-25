@@ -44,11 +44,11 @@ class Explainer:
 
         matched_jd_skills = sorted(set(matched_tech) | set(matched_soft))
         missing_jd_skills = sorted(set(missing_tech) | set(missing_soft))
-        total_required_skills = len(jd_tech_set) + len(jd_soft_set)
+        total_required_skills = len(jd_tech_set | jd_soft_set)
 
         skill_match_ratio = (
             round(len(matched_jd_skills) / total_required_skills * 100, 1)
-            if total_required_skills else 0.0
+            if total_required_skills else 100.0
         )
 
         # Build the explanation dict
@@ -161,6 +161,8 @@ class Explainer:
         soft_c = breakdown.get('soft_contribution', 0)
         yoe_c = breakdown.get('yoe_contribution', 0)
         extra_b = breakdown.get('extra_skills_bonus', 0)
+        extra_tech_b = breakdown.get('extra_tech_bonus', extra_b)
+        extra_soft_b = breakdown.get('extra_soft_bonus', 0)
         
         breakdown_text = (
             f"Score breakdown: {tech_c:.1f}% from Tech Skills + "
@@ -169,7 +171,12 @@ class Explainer:
             f"{text_c:.1f}% from Context Match"
         )
         if extra_b > 0:
-            breakdown_text += f" + **{extra_b:.1f}% bonus** for {len(extra_skills)} extra technical skills."
+            bonus_parts = []
+            if extra_tech_b > 0:
+                bonus_parts.append(f"{extra_tech_b:.1f}% for {len(extra_skills)} extra technical skills")
+            if extra_soft_b > 0:
+                bonus_parts.append(f"{extra_soft_b:.1f}% for {len(extra_soft)} extra soft skills")
+            breakdown_text += f" + **{extra_b:.1f}% bonus** ({'; '.join(bonus_parts)})."
         else:
             breakdown_text += "."
             

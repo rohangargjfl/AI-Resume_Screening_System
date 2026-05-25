@@ -183,10 +183,14 @@ class MatchingEngine:
             else:
                 yoe_score = min(resume_yoe / jd_yoe, 1.0)
             
-            req_set = {s.lower() for s in jd_tech_skills}
-            found_set = {s.lower() for s in resume['technical_skills']}
-            extra_tech = found_set - req_set
-            extra_bonus = min(len(extra_tech) * (weights.get('bonus', 0.05) / 10.0), weights.get('bonus', 0.05))
+            req_tech_set = {s.lower() for s in jd_tech_skills}
+            found_tech_set = {s.lower() for s in resume['technical_skills']}
+            req_soft_set = {s.lower() for s in jd_soft_skills}
+            found_soft_set = {s.lower() for s in resume['soft_skills']}
+            extra_tech = found_tech_set - req_tech_set
+            extra_soft = found_soft_set - req_soft_set
+            bonus_step = weights.get('bonus', 0.05) / 10.0
+            extra_bonus = min((len(extra_tech) + len(extra_soft)) * bonus_step, weights.get('bonus', 0.05))
             
             blended = (
                 (tech_score * weights['tech']) +
@@ -233,6 +237,7 @@ class MatchingEngine:
             req_soft = {s.lower() for s in jd_soft_skills}
             found_soft = {s.lower() for s in resume['soft_skills']}
             matched_soft = req_soft.intersection(found_soft)
+            extra_soft = found_soft - req_soft
 
             # Ratios
             tech_match_ratio = len(matched_tech) / len(req_tech) if req_tech else 1.0
@@ -250,8 +255,16 @@ class MatchingEngine:
             text_contrib = text_sim[i] * weights['context']
             soft_contrib = soft_match_ratio * weights['soft']
             
-            # Bonus points (dynamically capped so it doesn't overpower relevance)
-            extra_bonus = min(len(extra_tech) * (weights.get('bonus', 0.05) / 10.0), weights.get('bonus', 0.05))
+            # Bonus points share one cap across extra technical and soft skills.
+            bonus_step = weights.get('bonus', 0.05) / 10.0
+            bonus_cap = weights.get('bonus', 0.05)
+            extra_tech_bonus = len(extra_tech) * bonus_step
+            extra_soft_bonus = len(extra_soft) * bonus_step
+            extra_bonus = min(extra_tech_bonus + extra_soft_bonus, bonus_cap)
+            if extra_tech_bonus + extra_soft_bonus > bonus_cap and (extra_tech or extra_soft):
+                scale = bonus_cap / (extra_tech_bonus + extra_soft_bonus)
+                extra_tech_bonus *= scale
+                extra_soft_bonus *= scale
             
             blended = tech_contrib + soft_contrib + text_contrib + yoe_contrib + extra_bonus
             final = min(max(blended * 100, 0.0), 100.0)
@@ -272,6 +285,8 @@ class MatchingEngine:
                 'soft_contribution': round(soft_contrib * 100, 1),
                 'yoe_contribution': round(yoe_contrib * 100, 1),
                 'extra_skills_bonus': round(extra_bonus * 100, 1),
+                'extra_tech_bonus': round(extra_tech_bonus * 100, 1),
+                'extra_soft_bonus': round(extra_soft_bonus * 100, 1),
                 'jd_yoe': jd_yoe,
                 'resume_yoe': resume_yoe,
                 'yoe_match_display': (

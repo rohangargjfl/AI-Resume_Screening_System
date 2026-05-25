@@ -45,7 +45,7 @@ Similarly, if \(P_J\) is the set of requested soft skills and \(P_R\) is the set
 \begin{equation}
 S_{soft}=\frac{|P_J \cap P_R|}{|P_J|}\times 100.
 \end{equation}
-When a job description does not explicitly request soft skills, the soft component can be neutralized or assigned according to recruiter settings.
+When a job description does not explicitly request soft skills, the soft component is assigned full base credit so that the candidate is not penalized by a zero denominator.
 
 Skill extraction is performed using boundary-aware matching. A direct substring search can create false positives; for example, matching ``R'' inside ``manager'' would be incorrect. The extractor therefore treats skills as tokens or multi-word expressions with boundary conditions. Soft skills are also matched explicitly, which keeps the method transparent but limits semantic recall for indirectly stated traits.
 
@@ -78,14 +78,14 @@ S_{final}={}&(S_{tech}W_{tech})+(S_{soft}W_{soft})\\
 &+(S_{exp}W_{exp})+(S_{ctx}W_{ctx})+B.
 \end{split}
 \end{equation}
-The extra-skill bonus \(B\) is computed from skills that appear in the resume but are not explicitly required by the job:
+The extra-skill bonus \(B\) is computed from technical or soft skills that appear in the resume but are not explicitly required by the job:
 \begin{equation}
-B=\min\left(|T_R-T_J|\times \frac{B_{max}}{10},B_{max}\right).
+B=\min\left((|T_R-T_J|+|P_R-P_J|)\times \frac{B_{max}}{10},B_{max}\right).
 \end{equation}
-The cap prevents score inflation when candidates list many adjacent technologies.
+The cap prevents score inflation when candidates list many adjacent technologies or general soft-skill terms.
 
 \subsection{Explanation and Complexity}
 The explanation generator reports the match band, final score, matched experience ratio, matched JD skills, missing JD skills, bonus technical skills, bonus soft skills, and score breakdown. This deterministic template is intentionally direct: a recruiter can immediately see whether a candidate is missing PostgreSQL, REST, leadership, or another required capability. Let \(n\) be the number of resumes, \(d\) the TF-IDF vocabulary size, and \(k\) the skill ontology size. Digital parsing is approximately linear in document length, skill matching is proportional to ontology coverage, and final sorting is \(O(n\log n)\). OCR is the expensive branch, but it is invoked only for image files or failed digital extraction. This conditional design preserves speed while still reducing format bias.
 
 \subsection{Feature Engineering Rationale}
-The framework separates hard evidence from soft evidence. Explicit technical skills and years of experience are treated as bounded requirements, while contextual similarity and soft-skill terms help distinguish candidates with similar hard-skill coverage. The extra-skill bonus is separated from the base score so that adjacent skills such as Docker or Redis add value without hiding missing required skills such as PostgreSQL or REST.
+The framework separates hard evidence from soft evidence. Explicit technical skills, required soft skills, and years of experience are treated as bounded requirements, while contextual similarity helps distinguish candidates with similar explicit-skill coverage. The extra-skill bonus is separated from the base score so that adjacent skills such as Docker, Redis, leadership, or public speaking add value without hiding missing required skills such as PostgreSQL, REST, or communication.

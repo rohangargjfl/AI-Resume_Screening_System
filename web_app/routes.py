@@ -181,7 +181,7 @@ def _run_analysis(
                 'score_chart': score_chart,
                 'skill_chart': skill_chart,
                 'soft_chart': soft_chart,
-                'jd_skills': jd_nlp['technical_skills'],
+                'jd_skills': sorted(set(jd_nlp['technical_skills']) | set(jd_nlp['soft_skills'])),
                 'custom_weights': weights,
                 'context_mode': context_mode,
                 'context_model_label': score_details[0].get('context_model_label') if score_details else context_label,
