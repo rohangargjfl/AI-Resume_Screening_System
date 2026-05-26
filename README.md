@@ -6,6 +6,26 @@ A production-style prototype that uses NLP and Sentence Transformers to automati
 
 ---
 
+## 🚀 Run on Google Colab (No Setup Required!)
+
+> **Mam / Evaluator:** Sirf neeche diye link pe click karein aur `Runtime → Run All` press karein. Koi installation nahi, sirf Google account chahiye!
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/rohangargjfl/AI-Resume_Screening_System/blob/main/Run_On_Google_Colab.ipynb)
+
+**Direct Link:**
+```
+https://colab.research.google.com/github/rohangargjfl/AI-Resume_Screening_System/blob/main/Run_On_Google_Colab.ipynb
+```
+
+### Steps to Run:
+1. Click the link above → Opens directly in Google Colab
+2. Go to **Runtime → Run All**
+3. Wait ~5 minutes for setup (first time only)
+4. Click the **public URL** that appears at the end of the last cell
+5. Register with any email/password → Start screening resumes!
+
+---
+
 ## Features
 
 | Module | Description |
